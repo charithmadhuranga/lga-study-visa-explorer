@@ -28,6 +28,21 @@ for (const route of ROUTES) {
     await waitForMotionToSettle(page);
     expect(await stuckElements(page)).toEqual([]);
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
+
+    // The top bar stays one tidy row: chapters never collide with the action buttons.
+    if (route.name !== 'welcome') {
+      const [nav, actions] = await Promise.all([
+        page.locator('.chapters').boundingBox(),
+        page.locator('.bar-actions').boundingBox(),
+      ]);
+      expect(nav && actions).toBeTruthy();
+      if (nav && actions) {
+        expect(nav.x + nav.width, 'chapters overlap the action buttons').toBeLessThanOrEqual(
+          actions.x,
+        );
+        expect(Math.abs(nav.y - actions.y), 'top bar wrapped onto two rows').toBeLessThan(30);
+      }
+    }
     expect(tracked.errors).toEqual([]);
   });
 }
