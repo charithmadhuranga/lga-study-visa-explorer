@@ -1,0 +1,133 @@
+/* LGA Study Visa Explorer — design tokens (DESIGN.md §2–§4).
+   The single source of truth for colour, type, space, radius, elevation and motion.
+   Never hard-code a hex value anywhere else in the app (AGENTS §5). */
+@import 'tailwindcss';
+
+@theme {
+  /* Brand (theme independent) */
+  --color-navy: #0b1f3a;
+  --color-navy2: #16305a;
+  --color-gold: #c9a45c;
+  --color-gold2: #e3c88a;
+  --color-gold3: #a9813f;
+
+  /* Typography */
+  --font-display: Montserrat, system-ui, sans-serif;
+  --font-sans: Inter, system-ui, sans-serif;
+}
+
+/* Semantic colours reference the runtime custom properties below, so the light/dark switch
+   (data-theme) is picked up by every utility without rebuilding the CSS. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-chip: var(--chip);
+  --color-goldink: var(--goldInk);
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* ---- Brand ---- */
+  --navy: #0b1f3a;
+  --navy2: #16305a;
+  --navy3: #0a1a33;
+  --gold: #c9a45c;
+  --gold2: #e3c88a;
+  --gold3: #a9813f;
+  --white: #ffffff;
+
+  /* ---- Surfaces (light / dark). Three layers: page → card → raised. ---- */
+  --bg: light-dark(#f4f5f8, #061328);
+  --card: light-dark(#ffffff, #0c2044);
+  --card2: light-dark(#f1f3f7, #12294f);
+  --ink: light-dark(#0b1f3a, #eef1f6);
+  --ink2: light-dark(#2b3a55, #c8d2e2);
+  --mute: light-dark(#566079, #9daac0);
+  --line: light-dark(#e0e4eb, #1d3760);
+  --line2: light-dark(#cdd3de, #2a4a7a);
+  --chip: light-dark(#edf0f5, #15305a);
+  --goldInk: light-dark(#86662b, #e3c88a);
+  --gold-wash: light-dark(rgba(201, 164, 92, 0.14), rgba(201, 164, 92, 0.16));
+  /* 1px top highlight that gives dark cards their "lit edge"; invisible in light. */
+  --edge: light-dark(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.05));
+
+  /* ---- Text on navy / photo surfaces (fixed in both themes) ---- */
+  --on-navy: #ffffff;
+  --on-navy-lead: #d2dae7;
+  --on-navy-meta: #b8c4d8;
+  --on-navy-mute: #9aa9c2;
+  --on-navy-line: rgba(255, 255, 255, 0.16);
+  --on-navy-glass: rgba(11, 31, 58, 0.55);
+  --on-navy-glass-line: rgba(255, 255, 255, 0.14);
+  --backdrop: rgba(3, 10, 24, 0.78);
+
+  /* ---- Scrims (navy over photography) ---- */
+  --scrim-hero: linear-gradient(
+    90deg,
+    rgba(6, 19, 40, 0.97) 0%,
+    rgba(6, 19, 40, 0.86) 40%,
+    rgba(6, 19, 40, 0.25) 100%
+  );
+  --scrim-bottom: linear-gradient(
+    180deg,
+    rgba(6, 19, 40, 0) 30%,
+    rgba(6, 19, 40, 0.65) 62%,
+    rgba(6, 19, 40, 0.96) 100%
+  );
+  --scrim-band: linear-gradient(
+    90deg,
+    rgba(6, 19, 40, 0.96) 0%,
+    rgba(6, 19, 40, 0.7) 50%,
+    rgba(6, 19, 40, 0.35) 100%
+  );
+  --gold-grad: linear-gradient(135deg, var(--gold2), var(--gold));
+  --navy-grad: linear-gradient(150deg, var(--navy2), var(--navy));
+
+  /* ---- Space (4-px based rhythm, in rem so it scales with the root clamp) ---- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.25rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-10: 2.5rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+
+  /* ---- Radii ---- */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* ---- Elevation (the only shadows in the app) ---- */
+  --e1: 0 1px 2px rgba(3, 10, 25, 0.18);
+  --e2: 0 14px 30px -16px rgba(3, 10, 25, 0.55);
+  --e3: 0 32px 64px -28px rgba(3, 10, 25, 0.75);
+  --e-gold: 0 10px 24px -12px rgba(201, 164, 92, 0.55);
+
+  /* ---- Layout ---- */
+  --content-max: 1760px;
+  --gutter: max(3vw, 20px);
+  --bar-h: 4.4rem;
+
+  /* ---- Motion (DESIGN.md §7.2) ---- */
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.15s;
+  --dur-base: 0.35s;
+  --dur-slow: 0.7s;
+}
+
+/* Explicit theme overrides — the app defaults to dark (SPEC FR-25 / §12 D1). */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}

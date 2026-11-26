@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>LGA Study Visa Explorer</title>
+    <script>
+      // Apply the stored appearance before first paint so there is no light flash on the
+      // office screen (FR-25). Falls back to dark, the presentation default.
+      (function () {
+        try {
+          var stored = localStorage.getItem('appearance');
+          var mode = stored === 'light' || stored === 'auto' ? stored : 'dark';
+          if (mode === 'auto') {
+            document.documentElement.removeAttribute('data-theme');
+          } else {
+            document.documentElement.setAttribute('data-theme', mode);
+          }
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
