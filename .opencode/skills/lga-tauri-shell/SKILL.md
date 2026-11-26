@@ -15,7 +15,7 @@ Target crate layout is in `AGENTS.md` §2.
 ```jsonc
 {
   "productName": "LGA Study Visa Explorer",
-  "version": "2.0.0",
+  "version": "0.1.0",
   "identifier": "com.lgavisa.studyvisaexplorer",
   "app": {
     "windows": [{

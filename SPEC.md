@@ -1,6 +1,6 @@
 # SPEC — LGA Study Visa Explorer (Tauri edition)
 
-**Product:** `lga-study-visa-explorer` · productName **LGA Study Visa Explorer** · appId `com.lgavisa.studyvisaexplorer` · version line **2.x** (the Tauri rewrite; the Electron mock in `reference/` is 1.0.0)
+**Product:** `lga-study-visa-explorer` · productName **LGA Study Visa Explorer** · appId `com.lgavisa.studyvisaexplorer` · version line **0.x → 1.0** (the Tauri rewrite; first public release v0.1.0 on 2026-11-26; the Electron mock in `reference/` was 1.0.0 under another app id)
 **Status:** v1.1 — presentation redesign + rename to *LGA Study Visa Explorer* (2026-11-26); v1.0 approved baseline
 **Owners:** Lanka Global Access (Pvt) Ltd (LGA Visa), Nugegoda, Sri Lanka
 **Baseline:** `reference/` (Electron + vanilla JS mock, single `index.html`, built 2026-11-23)
@@ -489,12 +489,13 @@ record — verified 2026-11-26: 436 universities, 4,225 courses, 4,202 summaries
 | D6 | Rich text is rendered through an allowlist component, not `innerHTML` | security (FR-26) |
 | D7 | Status popover + update banner added to the top bar | update visibility (FR-20) |
 | D8 | App self-update added (the mock only shipped a Windows installer) | three OSes, unattended offices (FR-24) |
-| D9 | Version line starts at 2.0.0 | any existing 1.x install must see this as an upgrade |
+| D9 | Version line starts at **0.1.0** (was planned as 2.0.0) | the 2.0.0 plan existed to upgrade over Electron 1.x installs, but the new app id (D13) means there is no upgrade path anyway; 0.x signals in-office trials before 1.0 |
 | D10 | Visual design is the v2 presentation system in `DESIGN.md` (slide headers, chapter nav, cinematic bands, compare view) — the mock's *content and behaviour* remain the baseline, its *look* does not | the mock read as a website; the product replaces a pitch deck |
 | D11 | Navigation is five numbered chapters in pitch order (About LGA first) instead of the mock's four pills + shortlist | mirrors how consultants tell the story; clicker support (FR-27) |
 | D12 | `F11` / `Ctrl/Cmd+Q` handled in the window instead of `globalShortcut`; no opener plugin (the mock opens no external links) | OS-wide shortcuts would hijack F11 in other apps; no unused dependency |
 | D13 | Product renamed **LGA Study Visa Explorer** (`com.lgavisa.studyvisaexplorer`) | business naming; nothing had shipped under the old identifier |
 | D14 | Course summaries are filed under the university's country, not the course record's own `country` | the reference hid ~16 summaries whose course and university countries differ |
+| D16 | Windows installs per user (NSIS `currentUser`) instead of per machine | no admin rights needed to install or apply updates on office PCs |
 | D15 | No first-run copy of the snapshot to disk: no `current.json` ⇒ read the snapshot inside the app. Its `sourceGeneratedAt` is the reference build date, so the first online launch refreshes the catalogue once | saves ~9 MB of writes; that first refresh also re-filters intakes to today |
 
 ## 13. Traceability

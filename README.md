@@ -9,7 +9,7 @@ A full-screen desktop app LGA Visa consultants use to walk students and parents 
 universities, courses, visas and work rights — on the big office screen, online or offline.
 
 [![CI](https://github.com/charithmadhuranga/lga-study-visa-explorer/actions/workflows/ci.yml/badge.svg)](https://github.com/charithmadhuranga/lga-study-visa-explorer/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-2.0.0-C9A45C)](https://github.com/charithmadhuranga/lga-study-visa-explorer/releases)
+[![Release](https://img.shields.io/github/v/release/charithmadhuranga/lga-study-visa-explorer?color=C9A45C&label=release)](https://github.com/charithmadhuranga/lga-study-visa-explorer/releases/latest)
 [![License: Proprietary](https://img.shields.io/badge/license-proprietary%20%C2%B7%20commercial%20use%20by%20permission-0B1F3A)](LICENSE)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-16305A)](#download--install)
 
@@ -95,6 +95,8 @@ Installers are published on the [Releases](https://github.com/charithmadhuranga/
 | Linux (x64) | `….AppImage` (recommended) or `.deb` | ✅ AppImage · manual for `.deb` |
 
 > macOS builds are not yet notarised: on first launch, right-click the app and choose **Open**.
+> Setting up an office screen, kiosk mode or troubleshooting? See the **[operator guide](docs/OPERATOR-GUIDE.md)**.
+> What changed: **[CHANGELOG](CHANGELOG.md)** · Release QA: **[acceptance record](docs/ACCEPTANCE.md)**.
 
 **Using it in the office**
 

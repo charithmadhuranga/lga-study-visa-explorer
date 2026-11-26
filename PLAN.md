@@ -20,7 +20,7 @@ documentation. Milestones are sequential gates; tasks inside a milestone may ove
 | M5 Desktop shell | ✅ (gate ⏳) | CSP finalised; kiosk run-through on the office screen pending |
 | M6 Catalogue updater | ✅ (gate ⏳) | Rust updater, exact upstream parity, status chip, hot-swap, offline logo cache |
 | M7 App self-update | ✅ (gate ⏳) | signed updater, CI + release workflows, key in Actions secrets |
-| M8 Packaging & QA | ☐ next | README + proprietary LICENSE done |
+| M8 Packaging & QA | ✅ v0.1.0 released | hands-on QA rows in docs/ACCEPTANCE.md ⏳ |
 
 Legend: ✅ done · 🟡 in progress · ☐ not started · ⏳ needs a manual check on real hardware.
 
@@ -146,7 +146,7 @@ screen; `DESIGN` §7.3 no longer lists it).
 | 5.3 | External links — none exist in the product; `tauri-plugin-opener` not needed (SPEC D12) | ✅ n/a |
 | 5.4 | Clipboard write for “Copy summary” via `tauri-plugin-clipboard-manager` + capability | ✅ |
 | 5.5 | CSP finalisation: all network I/O is in Rust, so `connect-src` allows no external host | ✅ |
-| 5.6 | Icons, app metadata, identifiers, product name, version `2.0.0` | ✅ (final LGA icon artwork ⏳) |
+| 5.6 | Icons (LGA logo), app metadata, identifiers, product name, version `0.1.0` | ✅ |
 | 5.7 | Window close/quit behaviour: closing the window quits (mock parity) | ✅ |
 
 **Gate G5:** kiosk run-through on a large screen: no way out except `Ctrl/Cmd+Q`; CSP
@@ -193,22 +193,26 @@ Signing key generated 2026-11-26 and stored outside the repo (`~/.tauri/`), uplo
 repo's Actions secrets. Local signed AppImage build verified (artefact + `.sig`).
 
 **Gate G7:** a prerelease version installs on a test machine on all three OSes after one click;
-a bad signature is rejected and logged. — ⏳ (needs v2.0.0 published, then v2.0.1 to update to).
+a bad signature is rejected and logged. — ⏳ (v0.1.0 is published; release v0.1.1 and update to it).
 
 ---
 
-## M8 — Packaging, QA & handover (≈3 d)
+## M8 — Packaging, QA & handover (≈3 d)  ✅ v0.1.0 released (hands-on QA ⏳)
 
-| # | Task | Notes |
+| # | Task | Status |
 |---|---|---|
-| 8.1 | Windows NSIS installer (per-machine, desktop shortcut), macOS `.dmg`, Linux AppImage (+ optional deb) | FR-14 |
-| 8.2 | Full acceptance run of `SPEC.md` §10 (automated + manual checklists) | |
-| 8.3 | Soak test 8 h on the welcome screen; memory/CPU check | NFR-13 |
-| 8.4 | Airplane-mode full consultation; 4K + 1080p + laptop-mirror pass | NFR-07 |
-| 8.5 | Operator handover: `reference/README.md`-style usage doc updated for the new app, data-source FAQ | |
-| 8.6 | Tag `v2.0.0`, publish release, close milestone | |
+| 8.1 | Installers: Windows NSIS (current-user, no admin, licence page, Start menu + optional desktop shortcut), macOS `.dmg` (arm64, x64), Linux AppImage + deb; publisher/copyright/category metadata | ✅ |
+| 8.2 | Acceptance run of `SPEC.md` §10 → [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) | ➖ automated ✅, hands-on ⏳ |
+| 8.3 | Soak test 8 h on the welcome screen; memory/CPU check | ⏳ office PC |
+| 8.4 | Airplane-mode full consultation; 4K + 1080p + laptop-mirror pass | ⏳ office screen |
+| 8.5 | Operator handover: [`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md), README, CHANGELOG | ✅ |
+| 8.6 | Tag `v0.1.0`, publish the release with installers | ✅ |
 
-**Gate G8 (release):** `SPEC.md` §10 checklist fully ticked.
+Windows installs per user rather than per machine (SPEC D16): no administrator rights are
+needed to install or to apply updates, which matters on office PCs without admin accounts.
+
+**Gate G8 (release):** `SPEC.md` §10 checklist fully ticked — v0.1.0 ships for in-office trials
+with the ⏳ rows open; close them before 1.0.0.
 
 ---
 

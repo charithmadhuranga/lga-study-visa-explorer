@@ -1,7 +1,7 @@
 {
   "name": "lga-study-visa-explorer",
   "productName": "LGA Study Visa Explorer",
-  "version": "2.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Full-screen consultation screen for LGA Visa: destinations, universities and courses",
