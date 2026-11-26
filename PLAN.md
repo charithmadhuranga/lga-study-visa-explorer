@@ -21,6 +21,7 @@ documentation. Milestones are sequential gates; tasks inside a milestone may ove
 | M6 Catalogue updater | ✅ (gate ⏳) | Rust updater, exact upstream parity, status chip, hot-swap, offline logo cache |
 | M7 App self-update | ✅ (gate ⏳) | signed updater, CI + release workflows, key in Actions secrets |
 | M8 Packaging & QA | ✅ v0.1.0 released | hands-on QA rows in docs/ACCEPTANCE.md ⏳ |
+| M9 Stability & e2e | ✅ | Playwright suite (Chromium + WebKit), glitch fixes, movable window, Close button |
 
 Legend: ✅ done · 🟡 in progress · ☐ not started · ⏳ needs a manual check on real hardware.
 
@@ -216,6 +217,26 @@ with the ⏳ rows open; close them before 1.0.0.
 
 ---
 
+## M9 — Stability & end-to-end suite (≈2 d)  ✅
+
+Raised by hands-on testing of v0.1.0: page-load and animation glitches (fullscreen and
+windowed), a window that could not be moved, no close button, slow / stuck data loading.
+
+| # | Task | Status |
+|---|---|---|
+| 9.1 | Playwright suite (`e2e/`): every route, navigation, clicker keys, drill-down, scroll position, rapid navigation, flows, idle reset, close dialog, performance; glitch detectors for stuck elements, overflow, long tasks, console errors | ✅ 28 specs × 5 projects (Chromium + WebKit; fullscreen, windowed, reduced motion) |
+| 9.2 | Mount animations via `useMountAnimation`: layout effect (no flash), CSS transitions suspended during GSAP, props cleared; finder never re-animates on filtering | ✅ |
+| 9.3 | Navigation: instant scroll-to-top (no smooth scroll racing the transition); faster page transition (0.16 s out / 0.32 s in) | ✅ |
+| 9.4 | Window: decorations only removed in kiosk (movable/closable after F11), hidden until configured, min size; Close button with confirmation (hidden in kiosk) | ✅ |
+| 9.5 | Linux: `WEBKIT_DISABLE_DMABUF_RENDERER=1` (NVIDIA/WebKitGTK flicker) | ✅ |
+| 9.6 | Data: `logo_src`/`catalogue_active` async (off the UI thread), logo lookup by direct stat; minified snapshot (catalogue 3.25 → 2.54 MB); snapshot carries the real upstream `generatedAt`, so a fresh install no longer re-downloads identical data on first launch | ✅ |
+| 9.7 | CI: `e2e` job runs the full suite in Chromium and WebKit, uploads report + traces on failure | ✅ |
+
+Measured (Chromium, production build): every route ready 0.5–1.1 s cold; no task ≥ 50 ms on
+route changes; search keeps up with typing. WebKit: all specs green.
+
+---
+
 ## Dependency summary
 
 ```
@@ -247,6 +268,7 @@ M4 (motion) and M5 (shell) can run in parallel after M3. M6 depends on M2 (data 
 | `vite`, `typescript`, `vitest`, `@testing-library/react`, `eslint`, `prettier` | toolchain | `AGENTS` §4 |
 | Rust: `serde`, `serde_json`, `tokio` (time, sync, fs, io-util), `reqwest` 0.13 (`rustls`, `gzip`), `sha2`, `thiserror`, `tracing`, `tracing-subscriber` (fmt), `chrono` (clock) | updater core | `SPEC` §8 |
 | Rust dev: `tempfile` | store/updater tests | `AGENTS` §5 |
+| `@playwright/test` (dev) | end-to-end suite, NFR-17 | `AGENTS` §4–5 |
 
 No other runtime dependencies may be introduced without updating this table.
 

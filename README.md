@@ -136,6 +136,7 @@ npm run dev              # browser only, against the bundled snapshot
 | Task | Command |
 |---|---|
 | Type-check · lint · unit tests | `npm run typecheck && npm run lint && npm test` |
+| End-to-end (Playwright, production build) | `npm run e2e` (Chromium) · `npm run e2e:all` (+ WebKit) |
 | Rust checks | `cargo fmt --manifest-path src-tauri/Cargo.toml --check` · `cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings` · `cargo test --manifest-path src-tauri/Cargo.toml` |
 | Rebuild the bundled snapshot | `npm run data:import` |
 | Snapshot parity | `npm run data:parity` |

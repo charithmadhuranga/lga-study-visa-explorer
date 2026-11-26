@@ -8,7 +8,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import gsap from 'gsap';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { EmptyState } from '../components/EmptyState';
 import { LogoBadge } from '../components/LogoBadge';
@@ -23,6 +22,7 @@ import type { DetailFile } from '../data/types';
 import { useCatalogue } from '../store/catalogue';
 import { useSession } from '../store/session';
 import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 
 export function Course(): React.JSX.Element {
   const { courseKey } = useParams();
@@ -79,19 +79,13 @@ export function Course(): React.JSX.Element {
     return () => window.removeEventListener('keydown', onKey);
   }, [next, prev, navigate]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const ctx = gsap.context(() => {
-      gsap.from('.kv > div, .course-head > *', {
-        y: 14,
-        opacity: 0,
-        duration: 0.4,
-        stagger: 0.06,
-        ease: 'power3.out',
-      });
-    }, root);
-    return () => ctx.revert();
-  }, [enabled, courseKey]);
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      reveal('.kv > div', { y: 12, opacity: 0, duration: 0.4, stagger: 0.05 });
+    },
+    [courseKey],
+  );
 
   if (!index) return <EmptyState title="Catalogue loading…" />;
   if (!course || !university)

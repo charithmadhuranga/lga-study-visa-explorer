@@ -45,7 +45,11 @@ export default function App(): React.JSX.Element {
     <>
       {!isWelcome && <TopBar />}
       {!isWelcome && <UpdateBanner />}
-      <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
+      <AnimatePresence
+        mode="wait"
+        initial={false}
+        onExitComplete={() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })}
+      >
         <motion.main
           key={location.pathname}
           variants={pageVariants}

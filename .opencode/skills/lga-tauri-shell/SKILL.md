@@ -40,6 +40,13 @@ Target crate layout is in `AGENTS.md` §2.
   `window::LaunchMode` (managed state, unit-tested) and exposed to the UI through the
   `shell_info` command, which makes F11 inert. `Ctrl/Cmd+Q` still quits — deliberate parity
   (FR-14 AC).
+- Decorations are removed **only** in kiosk: fullscreen hides the title bar anyway, and after
+  F11 the window must be movable/closable. The window starts hidden (`visible: false`) and
+  `window::configure` shows it — even if applying fullscreen fails. Min size 1024×640.
+- Linux: `main.rs` sets `WEBKIT_DISABLE_DMABUF_RENDERER=1` (unless set) — the DMA-BUF renderer
+  flickers/stalls on many GPU drivers (SPEC D17).
+- Commands that touch the filesystem are `async fn` so they never run on the UI thread
+  (`logo_src` is called for every logo on a page).
 - `window-all-closed` → `app.quit()` (Electron parity); no dock/taskbar surprises.
 - Do not add a menu bar (`Menu.setApplicationMenu(null)` equivalent: no `menu` in the config).
 

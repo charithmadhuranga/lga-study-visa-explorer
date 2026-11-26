@@ -3,13 +3,12 @@
  * the four reasons to choose LGA. Copy from `content.ts`.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
 import { SERVICES, WHY } from '../data/content';
 import { PageHeader } from '../components/PageHeader';
 import { Icon, type IconName } from '../components/Icon';
-import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 
 /** Presentation icons, in SERVICES order (admissions, visas, English tests). */
 const SERVICE_ICONS: IconName[] = ['cap', 'passport', 'book'];
@@ -17,22 +16,14 @@ const SERVICE_ICONS: IconName[] = ['cap', 'passport', 'book'];
 export function Services(): React.JSX.Element {
   const navigate = useNavigate();
   const root = useRef<HTMLElement>(null);
-  const enabled = useMotionEnabled();
 
-  useEffect(() => {
-    if (!enabled) return;
-    const ctx = gsap.context(() => {
-      gsap.from('.service, .feature', {
-        y: 28,
-        opacity: 0,
-        duration: 0.55,
-        stagger: 0.07,
-        ease: 'power3.out',
-        clearProps: 'opacity,transform',
-      });
-    }, root);
-    return () => ctx.revert();
-  }, [enabled]);
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      reveal('.service, .feature', { y: 24, opacity: 0, duration: 0.5, stagger: 0.06 });
+    },
+    [],
+  );
 
   return (
     <section ref={root}>

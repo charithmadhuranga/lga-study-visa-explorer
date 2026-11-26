@@ -13,9 +13,12 @@ use crate::window::LaunchMode;
 
 /// Which bundle the UI should read. `None` means "use the snapshot shipped inside the app" —
 /// the first-run state, and the fallback whenever the store is missing or damaged (SPEC §7.2).
+/// Async so its file reads never run on the UI thread.
 #[tauri::command]
-pub fn catalogue_active(service: State<'_, Arc<Service>>) -> Option<ActiveBundle> {
-    service.active()
+pub async fn catalogue_active(
+    service: State<'_, Arc<Service>>,
+) -> Result<Option<ActiveBundle>, String> {
+    Ok(service.active())
 }
 
 /// Status-chip state (FR-20).
@@ -34,12 +37,16 @@ pub fn catalogue_check(service: State<'_, Arc<Service>>) {
 /// protocol); a miss returns `None` — the UI uses the remote URL or the crest — and starts a
 /// background download so the logo is there next time, including offline.
 #[tauri::command]
-pub fn logo_src(url: String, cache: State<'_, Arc<LogoCache>>) -> Option<String> {
+pub async fn logo_src(
+    url: String,
+    cache: State<'_, Arc<LogoCache>>,
+) -> Result<Option<String>, String> {
+    // Async: a page shows up to 24 logos at once — none of these lookups may touch the UI thread.
     if !logos::allowed(&url) {
-        return None;
+        return Ok(None);
     }
     if let Some(path) = cache.lookup(&url) {
-        return Some(path.display().to_string());
+        return Ok(Some(path.display().to_string()));
     }
     let cache = Arc::clone(&cache);
     tauri::async_runtime::spawn(async move {
@@ -47,7 +54,7 @@ pub fn logo_src(url: String, cache: State<'_, Arc<LogoCache>>) -> Option<String>
             tracing::debug!("logo not cached ({url}): {e}");
         }
     });
-    None
+    Ok(None)
 }
 
 /// Launch facts the UI needs: kiosk mode makes F11 inert (FR-14).

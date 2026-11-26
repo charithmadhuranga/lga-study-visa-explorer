@@ -58,19 +58,23 @@ mock is the **content/behaviour** baseline only — its look is superseded (SPEC
 
 ```tsx
 const root = useRef<HTMLElement>(null);
-const enabled = useMotionEnabled();
-useEffect(() => {
-  if (!enabled) return;
-  const ctx = gsap.context(() => {
-    gsap.from('.dest-card', { y: 40, opacity: 0, duration: 0.6, stagger: 0.07,
-      ease: 'power3.out', clearProps: 'opacity,transform' });
-  }, root);
-  return () => ctx.revert();
-}, [enabled]);
+useMountAnimation(
+  root,
+  ({ reveal }) => {
+    reveal('.dest-card', { y: 32, opacity: 0, duration: 0.55, stagger: 0.06 });
+  },
+  [view], // re-run only when these change
+);
 ```
 
+`useMountAnimation` runs in `useLayoutEffect` (no flash of the final state), suspends CSS
+transitions on the animated elements (no GSAP-vs-hover fight) and clears every inline style
+when done; reduced motion skips it. **Never write a raw `useEffect` + `gsap.from` again** —
+that pattern produced the stuck/jumping elements the e2e suite caught.
+
 Rules: `transform`/`opacity` only; ≤ ~12 staggered children; plays once; nothing loops;
-`clearProps` on mount tweens; Motion transitions get `{ duration: 0 }` when `!enabled`.
+never re-animate on filter changes; Motion transitions get `{ duration: 0 }` when `!enabled`.
+`npm run e2e` fails on anything left semi-transparent or translated after motion settles.
 Choreography per screen: `DESIGN.md` §7.3.
 
 **Gotcha:** a selector like `.chapter span { position: relative }` also hits the absolutely

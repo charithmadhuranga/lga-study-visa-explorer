@@ -132,9 +132,11 @@ function buildCatalogue() {
   return {
     schemaVersion: 2,
     built: raw.built,
-    // Bootstrap snapshot: the reference build date stands in for upstream generatedAt
-    // until the first runtime update replaces the bundle with a real fingerprint.
-    sourceGeneratedAt: raw.built,
+    // The upstream `generatedAt` this snapshot was built from. The reference data does not
+    // record it, so pass it in (LGA_SOURCE_GENERATED_AT, from upstream summary.json) — then a
+    // fresh install does not re-download identical data on first launch. Falls back to the
+    // build date, which makes the first online launch refresh once (SPEC D15).
+    sourceGeneratedAt: process.env.LGA_SOURCE_GENERATED_AT || raw.built,
     fxDate: raw.fxDate,
     fx: raw.fx,
     levels: raw.levels,

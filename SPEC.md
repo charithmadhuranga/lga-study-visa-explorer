@@ -171,8 +171,8 @@ After 4 minutes with no pointer/key/wheel/touch input on a non-welcome route, sh
 *AC:* in `--kiosk`, `F11` is inert and all window decorations/exit affordances are removed; no key is captured while another application is focused.
 
 **FR-14 Fullscreen and kiosk**
-App starts fullscreen with no menu bar and `#0B1F3A` background. `--kiosk` additionally removes decorations, pins the window on top and hides the cursor, and disables `F11`.
-*AC:* `Ctrl/Cmd+Q` still quits from kiosk (deliberate, matches mock); launching without flags never traps the consultant.
+App starts fullscreen with no menu bar and `#0B1F3A` background; the window is created hidden and shown once configured (no flash at the wrong size). Outside kiosk the window **keeps its title bar**: after `F11` it is a normal window (min 1024×640) that can be moved, resized and closed. A **Close** button in the top bar asks for confirmation ("Keep presenting" is the default) before quitting. `--kiosk` additionally removes decorations, pins the window on top, hides the cursor and the Close button, and disables `F11`.
+*AC:* `Ctrl/Cmd+Q` still quits from kiosk (deliberate, matches mock); launching without flags never traps the consultant; a stray click on Close never ends a consultation without confirmation.
 
 **FR-15 Feedback**
 Toast (navy pill, gold border, 2 s) for shortlist add/remove, copy success/failure, fullscreen unavailable, and update events.
@@ -447,6 +447,7 @@ record — verified 2026-11-26: 436 universities, 4,225 courses, 4,202 summaries
 | NFR-14 | Compatibility | Windows 10/11 x64, macOS 12+ (arm64/x86_64), Ubuntu 22.04+ / AppImage | smoke test per OS |
 | NFR-15 | Maintainability | Typecheck + lint + unit tests green in CI on every push | CI status |
 | NFR-16 | Localisation of numbers | `en-US` formatting for money and dates (parity with mock `toLocaleString('en-US')`) | unit test |
+| NFR-17 | Stability | Every route renders with no console errors, animations finish in their final state (nothing stuck faded or offset), no horizontal overflow at 1920×1080 and 1366×768, navigation lands at the top, no task > 200 ms on route changes or typing | Playwright suite (`npm run e2e:all`) green in Chromium and WebKit, in CI |
 
 ---
 
@@ -495,8 +496,9 @@ record — verified 2026-11-26: 436 universities, 4,225 courses, 4,202 summaries
 | D12 | `F11` / `Ctrl/Cmd+Q` handled in the window instead of `globalShortcut`; no opener plugin (the mock opens no external links) | OS-wide shortcuts would hijack F11 in other apps; no unused dependency |
 | D13 | Product renamed **LGA Study Visa Explorer** (`com.lgavisa.studyvisaexplorer`) | business naming; nothing had shipped under the old identifier |
 | D14 | Course summaries are filed under the university's country, not the course record's own `country` | the reference hid ~16 summaries whose course and university countries differ |
+| D17 | On Linux the app sets `WEBKIT_DISABLE_DMABUF_RENDERER=1` at startup unless already set | WebKitGTK's DMA-BUF renderer flickers and stalls repaints on many GPU drivers (seen on NVIDIA office hardware) |
 | D16 | Windows installs per user (NSIS `currentUser`) instead of per machine | no admin rights needed to install or apply updates on office PCs |
-| D15 | No first-run copy of the snapshot to disk: no `current.json` ⇒ read the snapshot inside the app. Its `sourceGeneratedAt` is the reference build date, so the first online launch refreshes the catalogue once | saves ~9 MB of writes; that first refresh also re-filters intakes to today |
+| D15 | No first-run copy of the snapshot to disk: no `current.json` ⇒ read the snapshot inside the app. The snapshot records the upstream `generatedAt` it was built from (`LGA_SOURCE_GENERATED_AT` at import), so a fresh install only downloads when upstream has actually changed | saves ~9 MB of writes and a pointless 12 MB download + data swap on first launch (intakes are re-filtered at render time anyway, FR-23) |
 
 ## 13. Traceability
 
@@ -510,3 +512,4 @@ record — verified 2026-11-26: 436 universities, 4,225 courses, 4,202 summaries
 | FR-25 (theme) | M4 | `lga-design-system` |
 | FR-27, FR-28 (presentation flow) | M4 | `lga-design-system`, `lga-desktop` |
 | NFR-01…NFR-16 | M1–M8 | all |
+| NFR-17 | M9 | `lga-desktop`, `lga-design-system` |

@@ -1,6 +1,11 @@
 //! Window behaviour: release builds open fullscreen on the office screen, `--kiosk` locks the
 //! app down (no decorations, always on top, cursor hidden, F11 inert — reference `main.js`
 //! parity, FR-14). Dev builds stay windowed so a developer is never trapped (PLAN task 1.8).
+//!
+//! Outside kiosk mode the window keeps its title bar: fullscreen hides it anyway, and after F11
+//! the consultant gets a normal window they can move, resize and close.
+//! The window is created hidden and shown once configured, so it never flashes at the wrong
+//! size before going fullscreen.
 
 use tauri::{AppHandle, Manager, WebviewWindow};
 
@@ -28,19 +33,23 @@ pub fn configure(app: &AppHandle, mode: LaunchMode) -> tauri::Result<()> {
         return Ok(());
     };
 
-    if cfg!(debug_assertions) && !mode.kiosk {
-        // `npm run tauri dev`: keep the 1600×900 window from tauri.conf.json.
-        return Ok(());
+    // `npm run tauri dev` keeps the 1600×900 window from tauri.conf.json (unless --kiosk).
+    let fullscreen = mode.kiosk || !cfg!(debug_assertions);
+    if fullscreen {
+        if let Err(e) = apply(&window, mode.kiosk) {
+            // Never leave the (hidden) window invisible: show it windowed instead.
+            tracing::warn!("could not apply fullscreen/kiosk: {e}");
+        }
     }
-
-    apply(&window, mode.kiosk)
+    window.show()?;
+    window.set_focus()?;
+    Ok(())
 }
 
 fn apply(window: &WebviewWindow, kiosk: bool) -> tauri::Result<()> {
-    window.set_decorations(false)?;
     window.set_fullscreen(true)?;
-
     if kiosk {
+        window.set_decorations(false)?;
         window.set_always_on_top(true)?;
         window.set_cursor_visible(false)?;
     }

@@ -4,7 +4,6 @@
 html {
   /* The big-screen scaling mechanism (DESIGN.md §3) — never replace with fixed px. */
   font-size: clamp(15px, calc(9px + 0.55vw), 22px);
-  scroll-behavior: smooth;
 }
 
 body {
@@ -216,9 +215,6 @@ img {
 
 /* Respect the OS reduced-motion setting even before React mounts (NFR-11). */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
   *,
   *::before,
   *::after {

@@ -7,13 +7,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
 import { COUNTRIES } from '../data/content';
 import { fmt, money } from '../data/format';
 import { DEST_IMAGES } from '../data/images';
 import { countrySummary, type CatalogueIndex } from '../data/selectors';
 import { useCatalogue } from '../store/catalogue';
-import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 import { PageHeader } from '../components/PageHeader';
 import { Segmented } from '../components/Segmented';
 import { SourceNote } from '../components/SourceNote';
@@ -29,7 +28,6 @@ const plural = (n: number, word: string): string => `${fmt(n)} ${word}${n === 1 
 export function Destinations(): React.JSX.Element {
   const navigate = useNavigate();
   const root = useRef<HTMLElement>(null);
-  const enabled = useMotionEnabled();
   const index = useCatalogue((s) => s.index);
   const [view, setView] = useState<View>(lastView);
 
@@ -37,20 +35,17 @@ export function Destinations(): React.JSX.Element {
     lastView = view;
   }, [view]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const ctx = gsap.context(() => {
-      gsap.from(view === 'cards' ? '.dest-card' : '.compare tr', {
-        y: view === 'cards' ? 40 : 12,
-        opacity: 0,
-        duration: 0.6,
-        stagger: view === 'cards' ? 0.07 : 0.04,
-        ease: 'power3.out',
-        clearProps: 'opacity,transform',
-      });
-    }, root);
-    return () => ctx.revert();
-  }, [enabled, view]);
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      if (view === 'cards') {
+        reveal('.dest-card', { y: 32, opacity: 0, duration: 0.55, stagger: 0.06 });
+      } else {
+        reveal('.compare-wrap', { y: 12, opacity: 0, duration: 0.4 });
+      }
+    },
+    [view],
+  );
 
   return (
     <section ref={root}>

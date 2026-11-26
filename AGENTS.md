@@ -34,7 +34,8 @@ opencode.json              OpenCode project config
 src/                       React app (screens, components, data loaders, animation, store, styles, assets)
 src-tauri/                 Rust shell (window/kiosk, catalogue updater, transform, commands, capabilities)
 scripts/                   Node build tools (data import, parity check)
-tests/                     cross-cutting test fixtures (upstream JSON subsets for parity)
+tests/                     cross-cutting vitest suites (screens, idle, parity, popovers, app update)
+e2e/                       Playwright end-to-end suite + glitch detectors (helpers.ts)
 ```
 
 Target structure (created during M1, per `PLAN.md`):
@@ -101,6 +102,8 @@ npm run typecheck          # tsc --noEmit
 npm run lint               # eslint + prettier --check
 npm run test               # vitest run (unit + component + parity of the JS side)
 npm run test:watch
+npm run e2e                # Playwright on the production build (Chromium: fullscreen, windowed, reduced motion)
+npm run e2e:all            # + WebKit (needs `npx playwright install --with-deps webkit`)
 npm run build              # tsc && vite build
 npm run tauri build        # release installers + updater artefacts (needs TAURI_SIGNING_PRIVATE_KEY; see the lga-tauri-shell skill)
 
@@ -155,8 +158,10 @@ LGA_CATALOGUE_SOURCE=/path/to/processed npm run tauri dev   # run the updater ag
 **Testing expectations**
 - New behaviour ships with a test at the lowest level that can prove it:
   transform/sanitize/filters → Rust or vitest; screen behaviour → Testing Library; timers → fake
-  timers; the Rust transform additionally has parity tests (see the catalogue skill).
-- `npm test` and `cargo test` must be green before a change is considered done.
+  timers; the Rust transform additionally has parity tests (see the catalogue skill);
+  anything a consultant sees or clicks through → a Playwright spec in `e2e/`.
+- `npm test`, `npm run e2e` and `cargo test` must be green before a change is considered done
+  (CI also runs WebKit: `npm run e2e:all`).
 
 ## 6. Definition of done (per task)
 

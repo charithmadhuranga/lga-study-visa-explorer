@@ -201,6 +201,7 @@ component, classes prefixed by the component).
 | `ContactLine` | welcome / CTA | phone, email, web, address with icons |
 | `Toast` | enter/leave | navy pill, gold border, check icon, `aria-live` wrapper |
 | `IdleDialog` | countdown | blurred backdrop, eyebrow, big ringed countdown, focus trapped |
+| `CloseButton` | hidden in kiosk | top-bar ✕ (red on hover) → confirmation dialog (same backdrop/panel), **Keep presenting** focused by default |
 | `RouteError` (screen) | — | branded failure inside the shell |
 | `StatusPopover` | chip: `ok` / `busy` (pulsing dot while a check runs) / `warn` (offline) / `error` | glass chip in the top bar (label hides < 1200 px); popover: catalogue + source dates, counts, FX month, retry note, **Check for updates**, Auto/Light/Dark `Segmented` |
 | `UpdateBanner` | offer / downloading (%) / restarting | sticky navy2 strip under the top bar with a gold inset edge: "Version x is ready … best between consultations" + **Restart & update** / **Later** (hides that version) |
@@ -259,9 +260,22 @@ component, classes prefixed by the component).
 | Finder | rows animate only when the result *count* changes, never per keystroke |
 | Shortlist | table `layout` spring on add/remove; top-bar badge pops on count change |
 | Next steps | timeline steps stagger, CTA band rises |
-| Global | `<main>` fades/rises 16 px (0.45 s), exits 0.25 s, then scrolls to top; chapter ink slides |
+| Global | `<main>` exits 0.16 s, jumps (instantly, never smooth) to the top, then fades/rises 16 px in 0.32 s; chapter ink slides |
 | Idle dialog | backdrop fade .25 s, panel `scale .96→1` |
 | Toast | `y 24→0` in .25 s, out .2 s |
+
+### 7.3a Mount animation rules (learned from the e2e suite)
+
+- Mount choreography runs through `useMountAnimation` (`src/animation/useMountAnimation.ts`):
+  **`useLayoutEffect`** so nothing paints in its final state first and then jumps back.
+- Elements GSAP animates have their **CSS transitions suspended** for the tween and every inline
+  style cleared afterwards — cards and buttons have hover transitions on `transform`, and a
+  transition fighting GSAP leaves elements lagging or stuck mid-way.
+- Nothing rests with a transform or reduced opacity: the e2e "stuck element" check fails on
+  any visible element with opacity < 1 or a translation after motion settles (centre icons
+  with `inset`/`margin: auto`, not `translateY(-50%)`).
+- Filtering never re-animates results; only arrival on a page does.
+- `html` has no `scroll-behavior: smooth` — navigation must start at the top immediately.
 
 ### 7.4 Reduced motion
 

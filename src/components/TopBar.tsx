@@ -15,6 +15,7 @@ import { useMotionEnabled } from '../animation/useMotionEnabled';
 import { toggleFullscreen } from '../shell/window';
 import { Icon } from './Icon';
 import { StatusPopover } from './StatusPopover';
+import { CloseButton } from './CloseButton';
 
 export function TopBar(): React.JSX.Element {
   const count = useSession((s) => s.shortlist.length);
@@ -94,6 +95,7 @@ export function TopBar(): React.JSX.Element {
         >
           <Icon name="expand" />
         </button>
+        <CloseButton />
       </div>
     </header>
   );

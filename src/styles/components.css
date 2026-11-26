@@ -192,7 +192,6 @@
     sans-serif;
   letter-spacing: 0.06em;
   color: var(--gold2);
-  opacity: 0.9;
 }
 .chapter[aria-current='page'] {
   color: var(--navy);
@@ -273,6 +272,19 @@
 .icon-btn svg {
   width: 20px;
   height: 20px;
+}
+
+.icon-btn--close:hover {
+  border-color: var(--danger);
+  color: var(--white);
+  background: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-top: var(--s-6);
 }
 
 /* =====================================================================
@@ -1286,10 +1298,11 @@ button.card:hover .uni-card__media img {
 .search svg {
   position: absolute;
   left: 0.9rem;
-  top: 50%;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
   width: 1.1rem;
   height: 1.1rem;
-  transform: translateY(-50%);
   color: var(--mute);
   pointer-events: none;
 }

@@ -7,7 +7,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import gsap from 'gsap';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { CourseRow } from '../components/CourseRow';
 import { EmptyState } from '../components/EmptyState';
@@ -32,12 +31,11 @@ import type { DetailFile } from '../data/types';
 import { photoUrl } from '../data/photos';
 import { useCatalogue } from '../store/catalogue';
 import { useFilters, filterState } from '../store/filters';
-import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 
 export function University(): React.JSX.Element {
   const { universityId } = useParams();
   const root = useRef<HTMLElement>(null);
-  const enabled = useMotionEnabled();
   const index = useCatalogue((s) => s.index);
   const scope = universityScope(universityId ?? '');
   const state = useFilters((s) => filterState(s, scope));
@@ -65,20 +63,14 @@ export function University(): React.JSX.Element {
     };
   }, [university]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const ctx = gsap.context(() => {
-      gsap.from('.fact', {
-        y: 16,
-        opacity: 0,
-        duration: 0.45,
-        stagger: 0.05,
-        ease: 'power3.out',
-      });
-      gsap.from('.uni-hero .logo', { scale: 0.94, opacity: 0, duration: 0.5, ease: 'power3.out' });
-    }, root);
-    return () => ctx.revert();
-  }, [enabled, universityId]);
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      reveal('.uni-hero .logo', { scale: 0.94, opacity: 0, duration: 0.45 }, 0);
+      reveal('.fact', { y: 14, opacity: 0, duration: 0.4, stagger: 0.05 }, 0.05);
+    },
+    [universityId],
+  );
 
   if (!index) return <EmptyState title="Catalogue loading…" />;
   if (!university) return <EmptyState title="University not found" action="Back to destinations" />;

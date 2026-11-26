@@ -4,9 +4,8 @@
  * GSAP plays the entrance once, then everything is still (DESIGN §7.3).
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
 import hero from '../assets/img/hero.webp';
 import logo from '../assets/img/logo.png';
 import { COUNTRIES } from '../data/content';
@@ -14,6 +13,7 @@ import { fmt } from '../data/format';
 import { CHAPTERS } from '../data/chapters';
 import { useCatalogue } from '../store/catalogue';
 import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 import { useCountUp } from '../animation/useCountUp';
 import { ContactLine } from '../components/ContactLine';
 import { Icon } from '../components/Icon';
@@ -33,21 +33,20 @@ export function Welcome(): React.JSX.Element {
   const universities = useCountUp(universityCount, 1.2, enabled && !!index);
   const courses = useCountUp(courseCount, 1.4, enabled && !!index);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const ctx = gsap.context(() => {
-      gsap
-        .timeline({ defaults: { ease: 'power3.out' } })
-        .from('.welcome__bg', { scale: 1.08, duration: 1.4, ease: 'power2.out' })
-        .from('.welcome .brand', { y: -12, opacity: 0, duration: 0.5 }, 0.15)
-        .from('.welcome__title .word', { y: 44, opacity: 0, duration: 0.7, stagger: 0.06 }, 0.25)
-        .from('.welcome .lead', { y: 16, opacity: 0, duration: 0.6 }, '-=0.35')
-        .from('.welcome__cta > *', { y: 14, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.3')
-        .from('.stat', { y: 22, opacity: 0, duration: 0.55, stagger: 0.08 }, '-=0.3')
-        .from('.welcome__contact', { opacity: 0, duration: 0.6 }, '-=0.2');
-    }, root);
-    return () => ctx.revert();
-  }, [enabled]);
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      reveal('.welcome__bg', { scale: 1.06, duration: 1.2, ease: 'power2.out' }, 0);
+      reveal('.welcome .brand', { y: -12, opacity: 0, duration: 0.5 }, 0.1);
+      reveal('.welcome .eyebrow', { opacity: 0, duration: 0.4 }, 0.15);
+      reveal('.welcome__title .word', { y: 36, opacity: 0, duration: 0.6, stagger: 0.05 }, 0.2);
+      reveal('.welcome .lead', { y: 14, opacity: 0, duration: 0.5 }, 0.55);
+      reveal('.welcome__cta', { y: 12, opacity: 0, duration: 0.45 }, 0.7);
+      reveal('.stat', { y: 18, opacity: 0, duration: 0.45, stagger: 0.07 }, 0.8);
+      reveal('.welcome__contact', { opacity: 0, duration: 0.5 }, 1.05);
+    },
+    [],
+  );
 
   return (
     <section

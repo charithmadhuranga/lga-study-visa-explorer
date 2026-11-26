@@ -3,8 +3,7 @@
  * Flat course rows (reference `renderFinder`), paged at `show + 6` and growing by 24.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
-import gsap from 'gsap';
+import { useMemo, useRef } from 'react';
 import { CourseRow } from '../components/CourseRow';
 import { EmptyState } from '../components/EmptyState';
 import { FilterRail, type ChipGroup } from '../components/FilterRail';
@@ -23,11 +22,10 @@ import { fmt, isoDate } from '../data/format';
 import { filterCourses, matchContext } from '../data/selectors';
 import { useCatalogue } from '../store/catalogue';
 import { useFilters, filterState } from '../store/filters';
-import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 
 export function CourseFinder(): React.JSX.Element {
   const root = useRef<HTMLElement>(null);
-  const enabled = useMotionEnabled();
   const index = useCatalogue((s) => s.index);
   const scope = SCOPE_FINDER;
   const state = useFilters((s) => filterState(s, scope));
@@ -52,24 +50,14 @@ export function CourseFinder(): React.JSX.Element {
   const limit = state.show + 6;
   const shown = courses.slice(0, limit);
 
-  // Animate only when the result set changes, never per keystroke (DESIGN §7.3).
-  const animatedCount = useRef(0);
-  useEffect(() => {
-    if (!enabled || !root.current) return;
-    if (animatedCount.current === courses.length) return;
-    animatedCount.current = courses.length;
-    const ctx = gsap.context(() => {
-      gsap.from('#results .course-row', {
-        y: 16,
-        opacity: 0,
-        duration: 0.35,
-        stagger: 0.03,
-        ease: 'power3.out',
-        clearProps: 'opacity,transform',
-      });
-    }, root);
-    return () => ctx.revert();
-  }, [enabled, courses.length]);
+  // Rows arrive once with the page; filtering never re-animates them (DESIGN §7.3).
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      reveal('#results .course-row', { y: 14, opacity: 0, duration: 0.35, stagger: 0.025 });
+    },
+    [],
+  );
 
   const groups: ChipGroup[] = index
     ? [

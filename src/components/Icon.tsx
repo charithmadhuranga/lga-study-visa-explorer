@@ -30,7 +30,8 @@ export type IconName =
   | 'moon'
   | 'grid'
   | 'columns'
-  | 'compass';
+  | 'compass'
+  | 'close';
 
 const PATHS: Record<IconName, React.ReactNode> = {
   'arrow-right': <path d="M5 12h14M13 6l6 6-6 6" />,
@@ -150,6 +151,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M9.5 4.5v15M14.5 4.5v15" />
     </>
   ),
+  close: <path d="M6 6l12 12M18 6L6 18" />,
   compass: (
     <>
       <circle cx="12" cy="12" r="8.5" />

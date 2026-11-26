@@ -65,6 +65,9 @@ pub fn key(url: &str) -> String {
         .collect()
 }
 
+/// Every extension `extension_for` can produce (lookup order = most common first).
+const EXTENSIONS: [&str; 6] = ["png", "jpg", "svg", "webp", "gif", "avif"];
+
 /// Content-Type → extension (the asset protocol picks the MIME type from it).
 pub fn extension_for(content_type: &str) -> Option<&'static str> {
     let mime = content_type
@@ -108,14 +111,13 @@ impl LogoCache {
     }
 
     /// The cached file for `url`, marked as just used; `None` on a miss.
+    /// A handful of `stat`s — never a directory scan (this runs for every logo on a page).
     pub fn lookup(&self, url: &str) -> Option<PathBuf> {
         let stem = key(url);
-        let entry = fs::read_dir(&self.dir).ok()?.flatten().find(|e| {
-            e.path()
-                .file_stem()
-                .is_some_and(|s| s.to_str() == Some(stem.as_str()))
-        })?;
-        let path = entry.path();
+        let path = EXTENSIONS
+            .iter()
+            .map(|ext| self.dir.join(format!("{stem}.{ext}")))
+            .find(|p| p.is_file())?;
         // Touch for LRU; failure only makes eviction slightly less accurate.
         if let Ok(f) = fs::File::options().append(true).open(&path) {
             let _ = f.set_modified(SystemTime::now());

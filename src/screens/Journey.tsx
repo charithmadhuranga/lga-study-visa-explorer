@@ -4,33 +4,29 @@
  * consultation ends on "here is what happens next". Copy from `content.ts`.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
 import { DOCS, STEPS } from '../data/content';
 import { PageHeader } from '../components/PageHeader';
 import { SourceNote } from '../components/SourceNote';
 import { ContactLine } from '../components/ContactLine';
 import { Icon } from '../components/Icon';
 import { useSession } from '../store/session';
-import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 
 export function Journey(): React.JSX.Element {
   const navigate = useNavigate();
   const root = useRef<HTMLElement>(null);
-  const enabled = useMotionEnabled();
   const shortlisted = useSession((s) => s.shortlist.length);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const ctx = gsap.context(() => {
-      gsap
-        .timeline({ defaults: { ease: 'power3.out' } })
-        .from('.journey li', { y: 24, opacity: 0, duration: 0.5, stagger: 0.08 })
-        .from('.cta-band', { y: 24, opacity: 0, duration: 0.6 }, '-=0.1');
-    }, root);
-    return () => ctx.revert();
-  }, [enabled]);
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      reveal('.journey li', { y: 20, opacity: 0, duration: 0.45, stagger: 0.07 });
+      reveal('.cta-band', { y: 20, opacity: 0, duration: 0.5 }, '-=0.15');
+    },
+    [],
+  );
 
   return (
     <section ref={root}>

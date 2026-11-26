@@ -9,8 +9,10 @@ export const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
 export const pageVariants: Variants = {
   initial: { opacity: 0, y: 16 },
-  enter: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT_EXPO } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.25, ease: 'easeIn' } },
+  // Short on purpose: with mode="wait" a navigation costs exit + enter, and a consultant
+  // clicking through chapters must never feel the app lag behind them.
+  enter: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE_OUT_EXPO } },
+  exit: { opacity: 0, y: -6, transition: { duration: 0.16, ease: 'easeIn' } },
 };
 
 /** Parent variant set for staggered grids (DESIGN §7.3: ≤12 animated children). */

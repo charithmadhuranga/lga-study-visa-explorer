@@ -8,7 +8,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import gsap from 'gsap';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { FilterRail, type ChipGroup } from '../components/FilterRail';
 import { UniversityCard } from '../components/UniversityCard';
@@ -32,7 +31,7 @@ import { institutionResults, matchContext, type CatalogueIndex } from '../data/s
 import type { CountryId } from '../data/types';
 import { useCatalogue } from '../store/catalogue';
 import { useFilters, filterState } from '../store/filters';
-import { useMotionEnabled } from '../animation/useMotionEnabled';
+import { useMountAnimation } from '../animation/useMountAnimation';
 
 type Tab = 'unis' | 'why' | 'visa';
 
@@ -44,24 +43,21 @@ export function Country(): React.JSX.Element {
   const country = COUNTRIES.find((c) => c.id === countryId);
   const [tab, setTab] = useState<Tab>(() => openTabs.get(countryId as CountryId) ?? 'unis');
   const root = useRef<HTMLElement>(null);
-  const enabled = useMotionEnabled();
   const index = useCatalogue((s) => s.index);
 
   useEffect(() => {
     if (countryId) openTabs.set(countryId as CountryId, tab);
   }, [countryId, tab]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const ctx = gsap.context(() => {
-      gsap
-        .timeline({ defaults: { ease: 'power3.out' } })
-        .from('.band > img', { scale: 1.06, duration: 1.2, ease: 'power2.out' })
-        .from('.band h1, .band__tagline', { y: 20, opacity: 0, duration: 0.6, stagger: 0.08 }, 0.1)
-        .from('.tile', { y: 18, opacity: 0, duration: 0.5, stagger: 0.06 }, 0.3);
-    }, root);
-    return () => ctx.revert();
-  }, [enabled, countryId]);
+  useMountAnimation(
+    root,
+    ({ reveal }) => {
+      reveal('.band > img', { scale: 1.05, duration: 1, ease: 'power2.out' }, 0);
+      reveal('.band h1, .band__tagline', { y: 18, opacity: 0, duration: 0.5, stagger: 0.08 }, 0.05);
+      reveal('.tile', { y: 16, opacity: 0, duration: 0.45, stagger: 0.05 }, 0.2);
+    },
+    [countryId],
+  );
 
   if (!country || !index)
     return <EmptyState title="Destination not found" action="Back to destinations" />;

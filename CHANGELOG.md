@@ -2,6 +2,30 @@
 
 All notable changes to LGA Study Visa Explorer. Versions follow [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Fixed
+- **Animation glitches:** elements could end stuck part-way through their entrance (e.g. the
+  welcome buttons), flash in their final position before animating, or stutter, because GSAP
+  and CSS hover transitions fought over the same property. Entrances now run before the first
+  paint with transitions suspended, and always finish cleanly.
+- **Navigation:** pages now open at the top instantly instead of smooth-scrolling while the
+  new page fades in; page transitions are faster.
+- **Window:** after leaving full screen (F11) the window has its title bar again, so it can be
+  moved, resized and closed; it no longer flashes at the wrong size on start.
+- **Linux rendering:** works around WebKitGTK flicker and stalled repaints on NVIDIA and other
+  GPU drivers.
+- **Slowness / stalls:** logo lookups no longer run on the UI thread; the bundled catalogue is
+  22 % smaller; a fresh install no longer re-downloads the whole catalogue on first launch.
+- Search filtering no longer re-animates the result list on every keystroke.
+
+### Added
+- **Close button** in the top bar, with a confirmation so a stray tap can't end a consultation
+  (hidden in kiosk mode).
+- **End-to-end test suite** (Playwright) covering every screen, navigation, data loading,
+  animations, layout at full-screen and windowed sizes, and reduced motion — in Chromium and
+  WebKit, run in CI on every push.
+
 ## [0.1.0] — 2026-11-26
 
 First public release of the Tauri desktop app, replacing the Electron prototype.
