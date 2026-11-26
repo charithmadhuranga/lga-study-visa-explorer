@@ -176,5 +176,5 @@ If a number differs, fix the transform — **never** adjust the expected values 
 | Fee display wrong for a country | check `currency` + `fx` in the bundle, then `format.ts` (`money`, `usd`) |
 | A course shows a closed intake | it is render-time filtering (FR-23) — check `filters.ts`, not the bundle |
 | Update loop spams downloads | fingerprint compare + `sourceGeneratedAt` guard in `fetch.rs` |
-| Logos broken offline | expected: crest fallback (FR-22); check `LogoBadge` and the LRU cache |
+| Logos broken offline | a logo shows offline only if it was seen online before (`catalogue/logos.rs`, `src/data/logos.ts`); otherwise the crest is expected (FR-22). New logo host? add it to `ALLOWED_HOSTS` |
 | Need to re-seed data in dev | `npm run data:import`, then restart `npm run tauri dev` |

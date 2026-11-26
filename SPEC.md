@@ -205,7 +205,7 @@ Course pages and country pages show the bundle build date, FX date and the offic
 *AC:* after an update, footnotes change without a code change.
 
 **FR-22 Logos and imagery**
-University logos load from `logoUrl` when online and are cached on disk (LRU, 50 MB cap). Failures fall back to a navy crest badge with the institution's initials. Destination/hero/curated-campus images are bundled and always available.
+University logos load from `logoUrl` when online and are cached on disk (LRU, 50 MB cap) by the `logo_src` command: https on the known logo hosts only (`photos.applyboard.com`, Wikimedia), `image/*` responses only, ≤ 1 MB each; a cached logo is served from disk through the asset protocol, a miss uses the remote URL and is cached in the background. Failures fall back to a navy crest badge with the institution's initials. Destination/hero/curated-campus images are bundled and always available.
 *AC:* airplane mode shows crests, never broken-image icons.
 
 **FR-23 Fresh intakes**

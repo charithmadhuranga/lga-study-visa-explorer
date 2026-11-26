@@ -210,3 +210,30 @@ fn live_full_update_commits_a_bundle() {
         pointer.dir, pointer.meta.counts.courses
     );
 }
+
+/// Live logo cache (opt-in): a real catalogue logo downloads, validates and is found again.
+#[test]
+#[ignore = "needs the internet"]
+fn live_logo_is_cached() {
+    use lga_study_visa_explorer_lib::catalogue::logos::LogoCache;
+    let snapshot: Catalogue = read(&snapshot_dir().join("catalogue.json"));
+    let url = snapshot
+        .universities
+        .iter()
+        .map(|u| u.logo_url.as_str())
+        .find(|u| u.starts_with("https://photos.applyboard.com/"))
+        .expect("a logo url");
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let cache = LogoCache::new(tmp.path());
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("runtime");
+    let path = rt.block_on(cache.fetch(url)).expect("fetch").expect("path");
+    assert_eq!(cache.lookup(url), Some(path.clone()));
+    eprintln!(
+        "cached {} bytes at {}",
+        std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0),
+        path.display()
+    );
+}

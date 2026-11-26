@@ -46,7 +46,7 @@ src/
   screens/           Welcome Destinations Country University Course CourseFinder Services Journey Shortlist RouteError
   components/        TopBar PageHeader Segmented Breadcrumbs FilterRail UniversityCard CourseRow LogoBadge
                      Icon SourceNote ContactLine EmptyState Pager RichText Toast IdleDialog StatusPopover
-  data/              types.ts  content.ts  chapters.ts  images.ts  catalogue.ts (loaders)  selectors.ts  filters.ts  format.ts  photos.ts
+  data/              types.ts  content.ts  chapters.ts  images.ts  catalogue.ts (loaders)  logos.ts  selectors.ts  filters.ts  format.ts  photos.ts
   store/             session.ts  filters.ts  catalogue.ts  appearance.ts  updates.ts (catalogue updater status + hot-swap)
   hooks/             useGlobalKeys.ts (Esc/Home/PageUp/PageDown/F11/Ctrl+Q)  useIdleTimer.ts
   shell/             window.ts (fullscreen, quit, kiosk info — the only code that talks to window APIs)
@@ -55,7 +55,7 @@ src/
 src-tauri/src/
   main.rs  lib.rs
   window.rs          fullscreen / kiosk / shortcuts
-  catalogue/         mod.rs (service, scheduler, events) model.rs store.rs fetch.rs transform.rs sanitize.rs updater.rs
+  catalogue/         mod.rs (service, scheduler, events) model.rs store.rs fetch.rs transform.rs sanitize.rs updater.rs logos.rs
 src-tauri/tests/
   upstream_parity.rs   Rust transform vs bundled snapshot (LGA_UPSTREAM_DIR) + opt-in live network tests
   commands.rs        catalogue_*, updater_*, clipboard, open_external

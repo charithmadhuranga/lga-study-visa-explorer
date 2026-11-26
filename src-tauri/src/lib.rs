@@ -22,6 +22,7 @@ pub fn run() {
             commands::catalogue_active,
             commands::catalogue_status,
             commands::catalogue_check,
+            commands::logo_src,
             commands::shell_info,
             commands::app_quit
         ])

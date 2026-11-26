@@ -5,9 +5,11 @@
 //! * `fetch`   — upstream source (HTTP or a local directory)
 //! * `store`   — versioned bundles + the atomic `current.json` pointer
 //! * `updater` — one attempt, Tauri-free and unit-tested
+//! * `logos`   — offline cache of university logos (FR-22)
 //! * this file — the managed service, scheduler, status model and events
 
 pub mod fetch;
+pub mod logos;
 pub mod model;
 pub mod sanitize;
 pub mod store;
@@ -138,6 +140,7 @@ pub fn init(app: &AppHandle) -> tauri::Result<()> {
     let root = app.path().app_data_dir()?.join(DIR_NAME);
     let source = Source::from_env_or_default();
     tracing::info!(root = %root.display(), source = %source.describe(), "catalogue service");
+    app.manage(Arc::new(logos::LogoCache::new(root.join("logos"))));
     let service = Arc::new(Service::new(root, source));
     service.store.clear_staging(); // leftovers from a crash mid-download
     app.manage(service.clone());

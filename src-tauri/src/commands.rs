@@ -7,6 +7,7 @@ use std::sync::Arc;
 use serde::Serialize;
 use tauri::{AppHandle, State};
 
+use crate::catalogue::logos::{self, LogoCache};
 use crate::catalogue::{ActiveBundle, Service, Status};
 use crate::window::LaunchMode;
 
@@ -27,6 +28,26 @@ pub fn catalogue_status(service: State<'_, Arc<Service>>) -> Status {
 #[tauri::command]
 pub fn catalogue_check(service: State<'_, Arc<Service>>) {
     service.check_now();
+}
+
+/// University logo from the disk cache (FR-22). A hit returns the absolute path (asset
+/// protocol); a miss returns `None` — the UI uses the remote URL or the crest — and starts a
+/// background download so the logo is there next time, including offline.
+#[tauri::command]
+pub fn logo_src(url: String, cache: State<'_, Arc<LogoCache>>) -> Option<String> {
+    if !logos::allowed(&url) {
+        return None;
+    }
+    if let Some(path) = cache.lookup(&url) {
+        return Some(path.display().to_string());
+    }
+    let cache = Arc::clone(&cache);
+    tauri::async_runtime::spawn(async move {
+        if let Err(e) = cache.fetch(&url).await {
+            tracing::debug!("logo not cached ({url}): {e}");
+        }
+    });
+    None
 }
 
 /// Launch facts the UI needs: kiosk mode makes F11 inert (FR-14).

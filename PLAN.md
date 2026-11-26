@@ -18,7 +18,7 @@ documentation. Milestones are sequential gates; tasks inside a milestone may ove
 | M3 Screen parity | ✅ (sign-off pending) | all nine routes + idle reset + keys; sign-off now against DESIGN v2 |
 | M4 Presentation redesign & motion | ✅ (audit pending) | axe audit + frame-chart pass still to do |
 | M5 Desktop shell | ✅ (gate ⏳) | CSP finalised; kiosk run-through on the office screen pending |
-| M6 Catalogue updater | ✅ (6.8 + gate ⏳) | Rust updater, exact upstream parity, status chip, hot-swap |
+| M6 Catalogue updater | ✅ (gate ⏳) | Rust updater, exact upstream parity, status chip, hot-swap, offline logo cache |
 | M7 App self-update | ☐ next | release feed can live on the public GitHub repo |
 | M8 Packaging & QA | ☐ | |
 
@@ -154,7 +154,7 @@ violations = 0 in the console. — ⏳
 
 ---
 
-## M6 — Catalogue updater (≈4 d)  ✅ (logo cache + in-app gate ⏳)
+## M6 — Catalogue updater (≈4 d)  ✅ (in-app gate ⏳)
 
 | # | Task | Status |
 |---|---|---|
@@ -165,7 +165,7 @@ violations = 0 in the console. — ⏳
 | 6.5 | Scheduler: 8 s after launch, 6 h, on demand, backoff 1/5/15/60 min; status events | ✅ |
 | 6.6 | Frontend hot-swap: `store/updates.ts` → `reload()` (keeps old data on failure) + toast | ✅ |
 | 6.7 | Status chip + popover (`StatusPopover`): states, provenance, Check for updates, Auto/Light/Dark | ✅ + tests |
-| 6.8 | Logo disk cache (LRU 50 MB) served through the asset protocol | ☐ next |
+| 6.8 | Logo disk cache: `logo_src` command, https + known hosts only, image types, ≤ 1 MB each, LRU 50 MB, served through the asset protocol | ✅ + tests (live logo cached) |
 | 6.9 | Upstream parity: Rust transform reproduces the bundled snapshot record for record (`npm run data:parity:upstream`) | ✅ 436 / 4,225 / 4,202 identical |
 | 6.10 | Failure injection: crash before pointer swap, corrupt JSON, missing file, offline, stale data behind a new summary, suspiciously small catalogue | ✅ tests |
 
