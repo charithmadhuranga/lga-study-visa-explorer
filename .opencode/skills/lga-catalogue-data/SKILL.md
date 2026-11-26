@@ -1,6 +1,6 @@
 ---
 name: LGA Catalogue Data
-description: The LGA Study Explorer catalogue - schema v2, bundling from the reference data, the Rust transform that ports tools/build_data.py, HTML sanitisation, the online auto-update pipeline and parity testing. Load for any data, updater or content-pipeline task.
+description: The LGA Study Visa Explorer catalogue - schema v2, bundling from the reference data, the Rust transform that ports tools/build_data.py, HTML sanitisation, the online auto-update pipeline and parity testing. Load for any data, updater or content-pipeline task.
 ---
 
 # Catalogue data & the auto-updater
@@ -123,7 +123,7 @@ test.
 ## 6. On-disk layout
 
 ```
-<APP_DATA>/lga-study-explorer/
+<APP_DATA>/lga-study-visa-explorer/
   current.json          { schemaVersion, dir: "bundled"|"updates/vN", meta }
   bundled/              catalogue.json · details/*.json        (first run)
   updates/vN/           catalogue.json · details/*.json · meta.json
@@ -133,7 +133,7 @@ test.
 
 Frontend access: Rust command `catalogue_active()` returns the root path → the UI reads files
 with `convertFileSrc()` + `fetch()` (asset protocol, scope
-`$APPDATA/lga-study-explorer/**/*` and `$RESOURCE/**/*`). Multi-MB payloads must not go over the
+`$APPDATA/lga-study-visa-explorer/**/*` and `$RESOURCE/**/*`). Multi-MB payloads must not go over the
 IPC invoke bridge.
 
 ## 7. Parity testing (this is how we know the port is right)
@@ -149,7 +149,7 @@ Assertions to keep green:
 |---|---|
 | institutions | 436 |
 | courses | 4,225 |
-| by country | usa 1147 · uk 1037 · canada 953 · australia 848 · new-zealand 240 |
+| by country | usa 1137 · uk 1035 · canada 965 · australia 848 · new-zealand 240 |
 | levels / fields | 3 / 12, `Other` last |
 | fx | USD 1.0, CAD 0.72, AUD 0.66, GBP 1.3, NZD 0.6, `fxDate` `YYYY-MM` |
 | golden records | 3 fixed courses (fee, duration, intakes, tags) + 2 universities (city/prov, campus, about snippet) unchanged by the port |

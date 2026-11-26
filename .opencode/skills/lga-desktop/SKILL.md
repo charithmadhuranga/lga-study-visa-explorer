@@ -1,6 +1,6 @@
 ---
 name: LGA Desktop App
-description: Build features in the LGA Study Explorer Tauri + React desktop app - routing, state, data selectors, screens, filters, shortlist, tests and repo conventions. Load for any general frontend task in this repository.
+description: Build features in the LGA Study Visa Explorer Tauri + React desktop app - routing, state, data selectors, screens, filters, shortlist, tests and repo conventions. Load for any general frontend task in this repository.
 ---
 
 # LGA desktop app — core procedures
@@ -27,13 +27,20 @@ src/
 
 Route table (`SPEC.md` §6) is registered only in `router.tsx` with `createHashRouter`:
 `/`, `/destinations`, `/c/:countryId`, `/u/:universityId`, `/k/:courseKey`,
-`/finder`, `/services`, `/journey`, `/shortlist`.
+`/finder`, `/services`, `/journey`, `/shortlist`, `*` → Destinations, all inside a pathless
+route whose `errorElement` is `RouteError` (keeps the top bar on failure).
+
+The presentation order (FR-27) lives only in `src/data/chapters.ts`: `CHAPTERS`,
+`chapterIndex(pathname)` (detail routes light their parent chapter) and
+`adjacentChapter(pathname, ±1)` (clicker stepping). The top bar and `useGlobalKeys` read it.
 
 ## Adding or changing a screen — checklist
 
 1. Find the requirement in `SPEC.md` (FR-01…FR-26) and the layout in `DESIGN.md` §6.
-2. Open `reference/index.html` and read the matching `v*()` function — it is the behaviour spec.
-3. Create `src/screens/<Name>.tsx` (default export) and register it in `router.tsx`.
+2. Open `reference/index.html` and read the matching `v*()` function — it is the behaviour and
+   content spec (the look comes from `DESIGN.md` v2).
+3. Create `src/screens/<Name>.tsx` (named export) and register it in `router.tsx`; if it is a
+   chapter, add it to `src/data/chapters.ts` and open it with `<PageHeader>`.
 4. Get data from selectors (`src/data/selectors.ts`), never by parsing JSON in a component.
 5. Use tokens/`DESIGN.md` components only — no new colours, radii, shadows or font sizes.
 6. Add motion via `usePageTransition` + the screen's GSAP context (see the `lga-design-system` skill).
@@ -85,6 +92,13 @@ Scopes never share state, but a university scope is **seeded once** from its cou
 first open (reference `vUni` behaviour) — implement as an explicit `inheritFrom()` call, not as
 live binding.
 
+## Store selector rule
+
+Zustand selectors must return **referentially stable** values. Never build a fresh object or
+array in a selector (`useStore(s => ({...}))`, `s.list.filter(…)`, `s.x ?? createDefault()`):
+React re-renders forever ("Maximum update depth exceeded"). Return stored references, a frozen
+module-level default (see `filterState`), or use `useShallow`.
+
 ## Keyboard map (FR-13)
 
 | Key | Action | Where |
@@ -92,8 +106,9 @@ live binding.
 | `Esc` | `history.back()`, blur focused input first | global keydown |
 | `Home` | navigate to `/destinations` | global keydown |
 | `←` / `→` | previous/next sibling course | only on `/k/:key` |
-| `F11` | toggle fullscreen (inert in kiosk) | Rust global shortcut |
-| `Ctrl/Cmd+Q` | quit | Rust global shortcut |
+| `PageDown` / `PageUp` | next / previous chapter (presentation clicker) | global keydown |
+| `F11` | toggle fullscreen (inert in kiosk) | global keydown → `shell/window.ts` |
+| `Ctrl/Cmd+Q` | quit | global keydown → `app_quit` command |
 
 Never swallow keys while an `<input>`/`<select>` is focused except `Esc` (blur).
 

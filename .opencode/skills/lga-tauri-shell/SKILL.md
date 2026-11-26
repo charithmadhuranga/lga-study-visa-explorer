@@ -1,6 +1,6 @@
 ---
 name: LGA Tauri Shell
-description: The Rust desktop shell of LGA Study Explorer - window and fullscreen/kiosk behaviour, global shortcuts, CSP and capabilities, plugins (opener, clipboard, store, updater), packaging and signing for Windows/macOS/Linux, and the signed app self-update. Load for any src-tauri or packaging task.
+description: The Rust desktop shell of LGA Study Visa Explorer - window and fullscreen/kiosk behaviour, shell commands (shell_info, app_quit), CSP and capabilities, plugins (clipboard, store, updater), packaging and signing for Windows/macOS/Linux, and the signed app self-update. Load for any src-tauri or packaging task.
 ---
 
 # Tauri shell, security and releases
@@ -14,19 +14,19 @@ Target crate layout is in `AGENTS.md` §2.
 
 ```jsonc
 {
-  "productName": "LGA Study Explorer",
+  "productName": "LGA Study Visa Explorer",
   "version": "2.0.0",
-  "identifier": "com.lgavisa.studyexplorer",
+  "identifier": "com.lgavisa.studyvisaexplorer",
   "app": {
     "windows": [{
-      "title": "LGA Study Explorer",
+      "title": "LGA Study Visa Explorer",
       "width": 1920, "height": 1080, "center": true,
       "fullscreen": true, "decorations": false,
       "backgroundColor": "#0B1F3A"
     }],
     "security": {
       "csp": { /* §3 */ },
-      "assetProtocol": { "enable": true, "scope": ["$APPDATA/lga-study-explorer/**/*", "$RESOURCE/**/*"] }
+      "assetProtocol": { "enable": true, "scope": ["$APPDATA/lga-study-visa-explorer/**/*", "$RESOURCE/**/*"] }
     }
   },
   "bundle": { "createUpdaterArtifacts": true, "targets": "all", "icon": [...] }
@@ -36,22 +36,27 @@ Target crate layout is in `AGENTS.md` §2.
 - **Dev vs release:** fullscreen is applied in Rust only under `#[cfg(not(debug_assertions))]`;
   `npm run tauri dev` must open a windowed 1600×900 window so the developer is not trapped.
 - `--kiosk` (CLI flag, parity with `reference/main.js`) additionally sets
-  `decorations(false)`, `always_on_top(true)`, `cursor_visible(false)`, and disables the F11
-  shortcut. `Ctrl/Cmd+Q` still quits — deliberate parity (FR-14 AC).
+  `decorations(false)`, `always_on_top(true)`, `cursor_visible(false)`. It is parsed once into
+  `window::LaunchMode` (managed state, unit-tested) and exposed to the UI through the
+  `shell_info` command, which makes F11 inert. `Ctrl/Cmd+Q` still quits — deliberate parity
+  (FR-14 AC).
 - `window-all-closed` → `app.quit()` (Electron parity); no dock/taskbar surprises.
 - Do not add a menu bar (`Menu.setApplicationMenu(null)` equivalent: no `menu` in the config).
 
 ## 2. Shortcuts
 
+All keys are handled **in the webview** (`src/hooks/useGlobalKeys.ts`) — no
+`tauri-plugin-global-shortcut` (SPEC §12 D12): OS-wide shortcuts would steal F11 from every other
+app on the consultant's machine while this one runs.
+
 | Key | Handler | Notes |
 |---|---|---|
-| `F11` | Rust: toggle `set_fullscreen` | skipped entirely in kiosk; on macOS also offer `Ctrl+Cmd+F` (system convention) |
-| `Ctrl/Cmd+Q` | Rust: `app.exit(0)` | register via `tauri-plugin-global-shortcut` so it works with the webview unfocused |
-| `Esc`, `Home`, `←`, `→` | frontend keydown | see `lga-desktop` skill — never in Rust |
+| `F11` | `shell/window.ts → toggleFullscreen()` → `getCurrentWindow().setFullscreen` | returns early when `shell_info().kiosk` |
+| `Ctrl/Cmd+Q` | `shell/window.ts → quitApp()` → `app_quit` command → `app.exit(0)` | works in kiosk |
+| `PageUp`/`PageDown`, `Esc`, `Home`, `←`, `→` | frontend keydown | see `lga-desktop` skill |
 
-Register global shortcuts in Rust (no frontend permission needed). Unregister on exit.
-Global-shortcut permission entries go in `src-tauri/capabilities/default.json` only if the
-frontend ever calls the plugin.
+Capabilities needed: `core:window:allow-set-fullscreen`, `core:window:allow-is-fullscreen`
+(the two commands are app commands, allowed by `core:default` + `generate_handler!`).
 
 ## 3. CSP (NFR-08)
 
@@ -87,7 +92,6 @@ Grant the minimum, per plugin:
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:allow-open-url",            // external links only — pair with an opener scope for https://* and mailto:*
     "clipboard-manager:allow-write-text",// FR-07 copy summary
     "store:default",                    // FR-25 appearance setting
     "updater:default"                   // FR-24 (check / download / install / download-and-install)
@@ -99,11 +103,11 @@ Rules: never `core:default` + broad fs/shell permissions “for later”; every 
 justified by an FR; no dialog/fs/scope permissions are needed for the catalogue (Rust reads the
 files itself and exposes them through the asset protocol).
 
-## 5. External links & clipboard (parity with the mock)
+## 5. External links & clipboard
 
-- The reference opens every non-`file://` URL in the system browser and denies window-open. Do the
-  same: a single `openExternal(url)` helper in `commands.rs` that validates `https://` or `mailto:`
-  before calling `tauri-plugin-opener`. No in-app browser, ever.
+- The product opens **no external links** (the mock has none either), so there is no opener
+  plugin (SPEC §12 D12). If one is ever needed, add `tauri-plugin-opener` with a scope limited to
+  `https://*` and `mailto:*`, record it in `PLAN.md`, and never navigate the main webview away.
 - “Copy summary” writes plain text (format defined in `SPEC.md` FR-07) through
   `clipboard-manager`; fall back to `navigator.clipboard`; on total failure show the existing
   “Copy is not available here” toast — never a silent no-op.
@@ -112,7 +116,7 @@ files itself and exposes them through the asset protocol).
 
 - Plugins: `tauri-plugin-updater` + `tauri-plugin-process` (`relaunch`).
 - Config: `bundle.createUpdaterArtifacts: true`, `plugins.updater.pubkey` (pinned, **not** a file
-  path), `plugins.updater.endpoints: ["https://github.com/<owner>/lga-study-explorer/releases/latest/download/latest.json"]`,
+  path), `plugins.updater.endpoints: ["https://github.com/<owner>/lga-study-visa-explorer/releases/latest/download/latest.json"]`,
   `plugins.updater.windows.installMode: "passive"`.
 - Signing: `TAURI_SIGNING_PRIVATE_KEY` (+ optional `_PASSWORD`) from the environment **only** —
   `.env` files are ignored by Tauri and must not be used. Losing the key means installed copies can
@@ -168,7 +172,7 @@ Keep the command surface small; anything else belongs in the frontend.
 | Blank screen in release | CSP missing `asset:` / `http://asset.localhost` in `default-src`/`connect-src` |
 | “asset protocol not configured to allow the path” | scope pattern doesn't match the resolved absolute path (use `$APPDATA/…/**/*`, not `*/**`) |
 | Fullscreen in dev traps you | fullscreen must be `cfg(not(debug_assertions))` |
-| F11 does nothing | global shortcut not registered, or running with `--kiosk` |
+| F11 does nothing | running with `--kiosk` (by design), or focus is inside a text field that swallowed it |
 | Update never offered | pubkey mismatch, `latest.json` platform key wrong, or version not > current |
 | Update installs without a click | flow bug — installation must be user-triggered (FR-24 AC) |
 | Logos missing offline | expected (crest fallback); check `img-src` allows `https:` when online |

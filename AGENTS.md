@@ -42,11 +42,14 @@ Target structure (created during M1, per `PLAN.md`):
 ```
 src/
   main.tsx  App.tsx  router.tsx
-  styles/            tokens.css  base.css
-  screens/           Welcome Destinations Country University Course CourseFinder Services Journey Shortlist
-  components/        TopBar Button Card ChipFilter FilterRail Panel Pill RichText Toast IdleDialog StatusPopover …
-  data/              types.ts  content.ts  catalogue.ts (loaders)  selectors.ts  filters.ts
+  styles/            tokens.css  base.css  components.css (design-system classes, one section per component)
+  screens/           Welcome Destinations Country University Course CourseFinder Services Journey Shortlist RouteError
+  components/        TopBar PageHeader Segmented Breadcrumbs FilterRail UniversityCard CourseRow LogoBadge
+                     Icon SourceNote ContactLine EmptyState Pager RichText Toast IdleDialog (StatusPopover in M6)
+  data/              types.ts  content.ts  chapters.ts  images.ts  catalogue.ts (loaders)  selectors.ts  filters.ts  format.ts  photos.ts
   store/             session.ts  filters.ts  catalogue.ts  appearance.ts
+  hooks/             useGlobalKeys.ts (Esc/Home/PageUp/PageDown/F11/Ctrl+Q)  useIdleTimer.ts
+  shell/             window.ts (fullscreen, quit, kiosk info — the only code that talks to window APIs)
   animation/         variants.ts  usePageTransition.ts  useCountUp.ts  useMotionEnabled.ts
   assets/img/        copied from reference/img (hero, dest-*, logo, uni/*)
 src-tauri/src/
@@ -113,8 +116,9 @@ LGA_UPSTREAM_DIR=/path/to/visa-website npm run data:parity:upstream   # full Rus
 **TypeScript**
 - `strict: true`, no `any`, no non-null assertions without a comment, explicit return types on
   exported functions.
-- One component per file; screens are default exports; shared pieces are named exports.
-- Route components live in `src/screens/` and are registered only in `router.tsx`.
+- One component per file; screens and shared pieces are named exports (App is the only default export).
+- Route components live in `src/screens/` and are registered only in `router.tsx`; the chapter
+  order lives only in `src/data/chapters.ts`.
 - Data access only through `src/data/*` + `src/store/*` — components never fetch or parse.
 
 **React**
@@ -125,9 +129,12 @@ LGA_UPSTREAM_DIR=/path/to/visa-website npm run data:parity:upstream   # full Rus
   without paging — the mock pages at 24 (+6 in the finder).
 
 **CSS**
-- Tailwind utilities for layout/spacing; CSS Modules for component visuals; all colour/typography
-  values come from `src/styles/tokens.css`.
-- Never hard-code a hex value outside `tokens.css`.
+- Tokens in `src/styles/tokens.css`; global type roles and helpers in `base.css`; component
+  visuals in `components.css`, one commented section per component with classes prefixed by the
+  component (`.dest-card__body`, `.chapter__ink`). Tailwind utilities are fine for one-off layout.
+- Never hard-code a colour (hex or rgba) outside `tokens.css`; no inline `style` except GSAP
+  initial states and the welcome `--hero` image URL.
+- Every chapter screen starts with `<PageHeader>`; money and rules carry a `<SourceNote>`.
 
 **Rust**
 - `clippy -D warnings` clean, `rustfmt` formatted, no `unwrap()` outside tests/parsers that
@@ -150,7 +157,7 @@ LGA_UPSTREAM_DIR=/path/to/visa-website npm run data:parity:upstream   # full Rus
 - [ ] Reduced-motion path verified (`prefers-reduced-motion: reduce`).
 - [ ] `npm run typecheck && npm run lint && npm test` green; `cargo test`/`clippy` green if Rust touched.
 - [ ] Docs updated if behaviour, schema, commands or structure changed.
-- [ ] Manual check at 1920×1080 if the change is visible.
+- [ ] Manual check at 1920×1080 if the change is visible (dark and light).
 
 ## 7. Working agreement for large tasks
 

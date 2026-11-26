@@ -1,7 +1,7 @@
-# SPEC — LGA Study Explorer (Tauri edition)
+# SPEC — LGA Study Visa Explorer (Tauri edition)
 
-**Product:** `lga-study-explorer` · productName **LGA Study Explorer** · appId `com.lgavisa.studyexplorer` · version line **2.x** (the Tauri rewrite; the Electron mock in `reference/` is 1.0.0)
-**Status:** v1.0 — approved baseline for implementation
+**Product:** `lga-study-visa-explorer` · productName **LGA Study Visa Explorer** · appId `com.lgavisa.studyvisaexplorer` · version line **2.x** (the Tauri rewrite; the Electron mock in `reference/` is 1.0.0)
+**Status:** v1.1 — presentation redesign + rename to *LGA Study Visa Explorer* (2026-11-26); v1.0 approved baseline
 **Owners:** Lanka Global Access (Pvt) Ltd (LGA Visa), Nugegoda, Sri Lanka
 **Baseline:** `reference/` (Electron + vanilla JS mock, single `index.html`, built 2026-11-23)
 
@@ -24,6 +24,11 @@ universities, open a course, add it to a shortlist, compare three options side b
 the summary into WhatsApp. It must never ask the customer to wait, never show a browser
 address bar, never show the previous customer's shortlist, and must keep working when the
 office internet drops.
+
+Because it **is the pitch**, the app is organised as a presentation, not a website: five
+numbered chapters — *01 About LGA → 02 Destinations → 03 Find a course → 04 Shortlist →
+05 Next steps* — that the consultant walks through in order (or jumps between), each opening
+with a slide-style title, ending on a call to action (FR-27).
 
 ### 1.1 Success definition
 
@@ -62,7 +67,7 @@ document and the mock disagree, the mock wins unless a deviation is listed in §
 ### 2.1 Reference facts (verified 2026-11-26)
 
 - Catalogue: `built 2026-11-23`, `fxDate 2026-11`, 436 institutions, 4,225 courses,
-  by country: USA 1,147 · UK 1,037 · Canada 953 · Australia 848 · New Zealand 240.
+  by country: USA 1,137 · UK 1,035 · Canada 965 · Australia 848 · New Zealand 240.
 - Upstream (`visa-website/scraper/data/processed/`): `summary.json` `generatedAt
   2026-11-22T15:11:57Z`, 4,225 published courses, 440 universities (436 with courses),
   9.6 MB `courses.json`, 2.8 MB `universities.json`, 1.3 KB `summary.json`.
@@ -111,16 +116,17 @@ Acceptance criteria are written as the check that must pass.
 ### A — Presentation screens
 
 **FR-01 Welcome / attract screen**
-Shows the hero photograph with navy gradient, LGA lockup, headline “Study abroad with Sri Lanka's *student visa specialists*”, lead paragraph, gold **Get started →** CTA, live stats (institutions, courses, destinations, “Free first consultation”) and the contact line.
-*AC:* stats are computed from the active bundle, not hard-coded; CTA navigates to `#/destinations`; the screen is the default route and the idle-reset target.
+Shows the hero photograph with navy gradient, LGA lockup, eyebrow “Free study visa consultation”, headline “Study abroad with Sri Lanka's *student visa specialists*”, lead paragraph, gold **Start the consultation →** (chapter 01) and secondary **Explore destinations** CTAs, live stats (institutions, courses, destinations, “Free first consultation”) as glass tiles, and the contact details with icons.
+*AC:* stats are computed from the active bundle, not hard-coded (and show final values under reduced motion); **Start the consultation** navigates to `#/services`, **Explore destinations** to `#/destinations`; the screen is the default route and the idle-reset target.
 
 **FR-02 Destinations**
-Five full-bleed destination cards (UK, Australia, Canada, New Zealand, USA) each with photograph, country name, post-study-work headline fact, institution and course counts, plus **Search all courses**.
-*AC:* counts match the active bundle per country; cards are keyboard-focusable buttons.
+Chapter 02. An **Explore / Compare** switch over the same five countries:
+*Explore* — five full-bleed destination cards (UK, Australia, Canada, New Zealand, USA) each with photograph, country name, post-study-work and main-intake facts, institution and course counts and an “Explore …” affordance; *Compare* — the side-by-side table of FR-28. Plus **Search all courses**.
+*AC:* counts match the active bundle per country; cards are keyboard-focusable buttons; the chosen view persists for the session.
 
 **FR-03 Country**
-Header band, 4-cell fact strip, three tabs — **Universities & courses** / **Why <country>** / **Visa & work** — and the source footnote.
-*AC:* tab state survives navigating to a course and back; “Visa & work” shows visa steps, FAQ, post-study-work panel, work-while-studying panel and the LGA disclaimer.
+Cinematic photo band with the title, tagline and the four key facts as glass tiles; a segmented tab control — **Universities & courses** / **Why <country>** / **Visa & work** — and the source footnote.
+*AC:* tab state survives navigating to a course and back; “Why” shows four numbered reasons and the cities; “Visa & work” shows the visa steps as a numbered timeline, the FAQ as expandable questions (answers revealed on demand), post-study-work and work-while-studying panels and the LGA disclaimer.
 
 **FR-04 University**
 Hero band with logo, 4-cell facts, About (clamped with **Read more**), At-a-glance list, Accommodation (hidden when empty), then the course list with its own filter rail.
@@ -138,12 +144,12 @@ Search across all 4,225 courses with destination / level / field / intake chips,
 Side-by-side comparison table (university, destination, level, duration, tuition/yr, next intake, work after study), **Copy summary**, **Start new consultation**.
 *AC:* copy puts plain text on the clipboard formatted for WhatsApp/email including the contact line; reset clears shortlist + filters and returns to welcome; empty state offers **Explore destinations**.
 
-**FR-08 Services**
-Three service cards (University admissions, Student visas, IELTS & PTE classes) with bullet lists, then the four “Why LGA” panels.
+**FR-08 About LGA (services)**
+Chapter 01. Three service cards with icons (University admissions, Student visas, IELTS & PTE classes) with bullet lists, then the four “Why LGA” panels.
 *AC:* content matches `SERVICES`/`WHY` in the reference verbatim.
 
-**FR-09 Your journey**
-Six numbered journey steps, then the two document checklists (Academic, Financial) and the funds warning note.
+**FR-09 Next steps (journey)**
+Chapter 05, the closing slide. Six numbered journey steps on a connected timeline, then the two document checklists (Academic, Financial), a call-to-action band (shortlist count, **Review shortlist**, contact details) and the funds warning note.
 *AC:* content matches `STEPS`/`DOCS` in the reference verbatim.
 
 **FR-10 Filter engine (shared)**
@@ -151,8 +157,8 @@ Search text, region/province chips (with “Show all N” beyond 10), study leve
 *AC:* filter state is scoped per route (`country`, `university`, `finder`) and never leaks between them; results re-render without losing scroll position.
 
 **FR-11 Chrome**
-Sticky navy top bar with brand lockup, nav pills with active state, shortlist counter badge, **Full screen** button; breadcrumbs with **← Back**; page fade-in.
-*AC:* brand lockup always returns to welcome; back uses history when available.
+Sticky navy top bar with brand lockup (`LGA VISA` / `STUDY VISA EXPLORER`), the five numbered chapters as one pill group with a sliding active indicator (FR-27), the shortlist counter badge on chapter 04, an appearance toggle and a **Full screen** button; breadcrumbs with **← Back**; page transition; a branded error screen inside the shell if any route fails.
+*AC:* brand lockup always returns to welcome; back uses history when available; detail routes light their parent chapter; a route error never shows a stack trace or a blank page.
 
 ### B — Consultation session behaviour
 
@@ -161,8 +167,8 @@ After 4 minutes with no pointer/key/wheel/touch input on a non-welcome route, sh
 *AC:* automated test drives the timer with fake timers; the next session cannot observe the previous shortlist.
 
 **FR-13 Keyboard**
-`Esc` → back (never exits the app) · `Home` → destinations · `←`/`→` → course stepper · `F11` → fullscreen toggle · `Ctrl/Cmd+Q` → quit. Keys are ignored while a text input is focused (except `Esc` to blur).
-*AC:* in `--kiosk`, `F11` is inert and all window decorations/exit affordances are removed.
+`Esc` → back (never exits the app) · `Home` → destinations · `PageDown`/`PageUp` → next/previous chapter (presentation clickers send these) · `←`/`→` → course stepper · `F11` → fullscreen toggle · `Ctrl/Cmd+Q` → quit. Keys are handled by the app window (not OS-wide global shortcuts) and ignored while a text input is focused (except `Esc` to blur).
+*AC:* in `--kiosk`, `F11` is inert and all window decorations/exit affordances are removed; no key is captured while another application is focused.
 
 **FR-14 Fullscreen and kiosk**
 App starts fullscreen with no menu bar and `#0B1F3A` background. `--kiosk` additionally removes decorations, pins the window on top and hides the cursor, and disables `F11`.
@@ -211,12 +217,22 @@ The installed app checks a signed static JSON feed (GitHub Releases `latest.json
 *AC:* no update is ever installed in the middle of a consultation without an explicit click; a signature mismatch aborts with a logged error; `Ctrl/Cmd+Q` still works.
 
 **FR-25 Theme**
-Dark navy presentation theme by default (recommended for the office screen), with `Auto / Light / Dark` override in the status popover, persisted locally. Light theme tokens exist and are fully styled (parity with the mock's `light-dark()` system).
+Dark navy presentation theme by default (recommended for the office screen), with a one-tap dark/light toggle in the top bar and the full `Auto / Light / Dark` choice in the status popover (M6), persisted locally. Light theme tokens exist and are fully styled (parity with the mock's `light-dark()` system).
 *AC:* switching theme does not reload the app or lose filters.
 
 **FR-26 Safe rich text**
 Scraped HTML (course summaries, about, accommodation) is sanitised in Rust at transform time to a fixed allowlist and rendered by a React component that maps allowed tags to elements. No `innerHTML` with unsanitised input anywhere in the app.
 *AC:* a unit test feeds `<script>`, `<img onerror>`, `<iframe>` and `<a href="javascript:">` through the pipeline and asserts they are gone.
+
+### D — Presentation flow
+
+**FR-27 Presentation chapters**
+The consultation is five numbered chapters in pitch order: `01 About LGA` (`#/services`), `02 Destinations` (`#/destinations`, owning `#/c/*` and `#/u/*`), `03 Find a course` (`#/finder`, owning `#/k/*`), `04 Shortlist` (`#/shortlist`), `05 Next steps` (`#/journey`). Each chapter screen opens with a slide header: gold eyebrow `NN · Chapter`, title, lead and actions. `PageDown`/`PageUp` step forward/back (welcome ⇄ 01 … 05).
+*AC:* unit-tested chapter map and clicker stepping; the top bar always lights exactly one chapter off the welcome screen.
+
+**FR-28 Destination comparison**
+The Destinations *Compare* view shows the five countries as columns (photo header → country page) and rows: work after you graduate, main intakes, work while studying, typical tuition / year (median of listed fees, local currency + ≈ US$), tuition from, institutions & courses in the catalogue, and one “good to know” fact.
+*AC:* tuition and counts are computed from the active bundle (`countrySummary` selector, unit-tested; “on request” fees excluded); rules come from `content.ts`; the provenance note shows the bundle and FX dates.
 
 ---
 
@@ -233,6 +249,8 @@ Scraped HTML (course summaries, about, accommodation) is sanitised in Rust at tr
 | `#/services` | `screens/Services` | static content | `vServices` |
 | `#/journey` | `screens/Journey` | static content | `vJourney` |
 | `#/shortlist` | `screens/Shortlist` | session shortlist | `vShortlist` |
+| `#/*` (unknown) | `screens/Destinations` | — | *new* |
+| — (route error) | `screens/RouteError` | — | *new* |
 | — (overlay) | `components/IdleDialog` | session timer | `#idle` |
 | — (popover) | `components/StatusPopover` | update state | *new* |
 
@@ -304,7 +322,7 @@ interface DetailFile {                    // details/<country>.json
 ### 7.2 Bundle layout on disk
 
 ```
-<APP_DATA>/lga-study-explorer/            # Tauri app_data_dir
+<APP_DATA>/lga-study-visa-explorer/            # Tauri app_data_dir
 ├── current.json                          # pointer: { schemaVersion, dir, meta }  (atomic write)
 ├── bundled/                              # first-run copy of the shipped snapshot
 │   ├── catalogue.json                    # ~1.1 MB
@@ -320,7 +338,7 @@ interface DetailFile {                    // details/<country>.json
 
 The frontend never parses a path from user input: it asks Rust for the active bundle root
 (`catalogue_active()`) and loads files through the **asset protocol**
-(`app.security.assetProtocol.enable`, scope `$APPDATA/lga-study-explorer/**/*` +
+(`app.security.assetProtocol.enable`, scope `$APPDATA/lga-study-visa-explorer/**/*` +
 `$RESOURCE/**/*`) using `convertFileSrc`. This keeps multi-MB reads off the IPC bridge.
 
 ### 7.3 Provenance
@@ -368,7 +386,7 @@ machines). `connect-src` allows only `raw.githubusercontent.com` and `objects.gi
 
 - `bundle.createUpdaterArtifacts: true`; `plugins.updater.pubkey` pinned in `tauri.conf.json`;
   signing key only via `TAURI_SIGNING_PRIVATE_KEY` env var in CI (`.env` files are ignored by Tauri).
-- Endpoint: `https://github.com/<owner>/lga-study-explorer/releases/latest/download/latest.json`
+- Endpoint: `https://github.com/<owner>/lga-study-visa-explorer/releases/latest/download/latest.json`
   (static JSON, `platforms` keys `windows-x86_64`, `darwin-aarch64`, `darwin-x86_64`, `linux-x86_64`).
 - Flow: check on launch (10 s delay) + every 24 h + **Check for app update** → banner →
   `downloadAndInstall()` on click → `relaunch()` from `@tauri-apps/plugin-process`.
@@ -424,13 +442,13 @@ machines). `connect-src` allows only `raw.githubusercontent.com` and `objects.gi
 
 ## 10. Acceptance checklist (release gate)
 
-- [ ] All nine routes render from the active bundle with reference-identical content.
+- [ ] All nine routes render from the active bundle with reference-identical content (copy, counts, rules).
 - [ ] Every acceptance criterion in §5 passes (automated where marked, manual checklist otherwise).
 - [ ] FR-12 idle reset verified with fake timers and manually at the office screen.
 - [ ] Airplane-mode walkthrough of a full consultation passes (NFR-07).
 - [ ] Catalogue update verified against a synthetic `summary.json` change (FR-19) and against the real upstream (FR-19 live).
 - [ ] App update verified from a prerelease `latest.json` on all three OSes (FR-24).
-- [ ] Visual parity sign-off at 1920×1080 against `reference/` for every route.
+- [ ] Visual sign-off at 1920×1080 against `DESIGN.md` v2 for every route, in dark and light (the reference is the functional baseline; its look is superseded — D10).
 - [ ] Reduced-motion pass: no parallax, no counters, instant transitions (NFR-11).
 - [ ] `npm run typecheck && npm run lint && npm test && cargo test` green.
 - [ ] Installers produced for Windows/macOS/Linux and installed on a clean machine.
@@ -462,6 +480,10 @@ machines). `connect-src` allows only `raw.githubusercontent.com` and `objects.gi
 | D7 | Status popover + update banner added to the top bar | update visibility (FR-20) |
 | D8 | App self-update added (the mock only shipped a Windows installer) | three OSes, unattended offices (FR-24) |
 | D9 | Version line starts at 2.0.0 | any existing 1.x install must see this as an upgrade |
+| D10 | Visual design is the v2 presentation system in `DESIGN.md` (slide headers, chapter nav, cinematic bands, compare view) — the mock's *content and behaviour* remain the baseline, its *look* does not | the mock read as a website; the product replaces a pitch deck |
+| D11 | Navigation is five numbered chapters in pitch order (About LGA first) instead of the mock's four pills + shortlist | mirrors how consultants tell the story; clicker support (FR-27) |
+| D12 | `F11` / `Ctrl/Cmd+Q` handled in the window instead of `globalShortcut`; no opener plugin (the mock opens no external links) | OS-wide shortcuts would hijack F11 in other apps; no unused dependency |
+| D13 | Product renamed **LGA Study Visa Explorer** (`com.lgavisa.studyvisaexplorer`) | business naming; nothing had shipped under the old identifier |
 
 ## 13. Traceability
 
@@ -473,4 +495,5 @@ machines). `connect-src` allows only `raw.githubusercontent.com` and `objects.gi
 | FR-19, FR-20 (data updates) | M6 | `lga-catalogue-data` |
 | FR-24 (app updates) | M7 | `lga-tauri-shell` |
 | FR-25 (theme) | M4 | `lga-design-system` |
+| FR-27, FR-28 (presentation flow) | M4 | `lga-design-system`, `lga-desktop` |
 | NFR-01…NFR-16 | M1–M8 | all |

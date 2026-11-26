@@ -1,4 +1,4 @@
-# PLAN — LGA Study Explorer (Tauri) delivery plan
+# PLAN — LGA Study Visa Explorer (Tauri) delivery plan
 
 **Baseline:** `reference/` · **Spec:** `SPEC.md` · **Design:** `DESIGN.md` · **Rules:** `AGENTS.md`
 **Status board:** this file is updated as milestones progress. Tick tasks as they complete.
@@ -8,16 +8,32 @@ documentation. Milestones are sequential gates; tasks inside a milestone may ove
 
 ---
 
+## Status at a glance (2026-11-26)
+
+| Milestone | State | Notes |
+|---|---|---|
+| M0 Docs | ✅ | v1.1 docs: rename + presentation redesign (SPEC FR-27/28, D10–D13; DESIGN v2) |
+| M1 Scaffold | ✅ (gate partly open) | release-build fullscreen check pending a first `tauri build` |
+| M2 Data foundation | ✅ | parity, filters, formatting, RichText tests green |
+| M3 Screen parity | ✅ (sign-off pending) | all nine routes + idle reset + keys; sign-off now against DESIGN v2 |
+| M4 Presentation redesign & motion | ✅ (audit pending) | axe audit + frame-chart pass still to do |
+| M5 Desktop shell | 🟡 | code done; CSP finalisation with M6, kiosk run-through on the office screen |
+| M6 Catalogue updater | ☐ next | |
+| M7 App self-update | ☐ | |
+| M8 Packaging & QA | ☐ | |
+
+Legend: ✅ done · 🟡 in progress · ☐ not started · ⏳ needs a manual check on real hardware.
+
+---
+
 ## 0. Prerequisites
 
-- [ ] `git init` + `.gitignore` (`node_modules/`, `dist/`, `src-tauri/target/`, `.env*`, `*.log`)
-- [ ] Toolchain confirmed: Node 20+ (24 present), Rust ≥ 1.90 (1.99 present), `npm`
-- [ ] Platform build deps for Tauri 2 on Linux: `libwebkit2gtk-4.1-dev`, `libgtk-3-dev`,
-      `libayatana-appindicator3-dev`, `librsvg2-dev`, `patchelf`, `libssl-dev`
-      (`sudo apt install` — required before `cargo build` on the Linux dev machine)
+- [x] `git init` + `.gitignore` (`node_modules/`, `dist/`, `src-tauri/target/`, `.env*`, `*.log`, `*.tsbuildinfo`)
+- [x] Toolchain confirmed: Node 20+ (24 present), Rust ≥ 1.90 (1.99 present), `npm`
+- [x] Platform build deps for Tauri 2 on Linux (`cargo check`/`clippy` build the crate)
 - [ ] GitHub repository decided for releases (`SPEC.md` A4) and a signing key generated:
       `npm run tauri signer generate` → private key stored in CI secrets **only**
-- [ ] Reference facts re-verified: 436 institutions / 4,225 courses / 5 countries
+- [x] Reference facts re-verified: 436 institutions / 4,225 courses / 5 countries (`npm run data:parity`)
 
 ---
 
@@ -28,109 +44,113 @@ documentation. Milestones are sequential gates; tasks inside a milestone may ove
 | 0.1 | Analyse `reference/` (mock shell, 9 screens, filter engine, idle reset, data pipeline) | ✅ |
 | 0.2 | Verify upstream `visa-website/scraper/data/processed` schema, sizes, public access | ✅ |
 | 0.3 | `SPEC.md` — requirements, schema v2, update system, NFRs, acceptance gate | ✅ |
-| 0.4 | `DESIGN.md` — tokens, typography, layout, components, screens, motion system | ✅ |
+| 0.4 | `DESIGN.md` — tokens, typography, layout, components, screens, motion system | ✅ (v2) |
 | 0.5 | `AGENTS.md` — repo map, ground rules, commands, conventions, DoD | ✅ |
 | 0.6 | `SKILL.md` + `.opencode/skills/*` (4 skills) + `opencode.json` | ✅ |
 | 0.7 | `PLAN.md` — this document | ✅ |
-
-**Gate:** user reviews and approves the five documents and the skills before any product code.
+| 0.8 | Rename to **LGA Study Visa Explorer** (`com.lgavisa.studyvisaexplorer`) across app, crate and docs | ✅ |
 
 ---
 
-## M1 — Project scaffold (≈2 d)
+## M1 — Project scaffold (≈2 d)  ✅
 
-| # | Task | Depends | Notes |
-|---|---|---|---|
-| 1.1 | Vite + React 19 + TS + Tailwind v4 + ESLint/Prettier + Vitest | 0.x | `npm create tauri-app` baseline, then adjust |
-| 1.2 | `src-tauri` Tauri 2 shell: window config (fullscreen, `#0B1F3A`, no menu), CSP, asset protocol scope, capabilities | 1.1 | `SPEC` §7.2, §9 |
-| 1.3 | Hash router with all nine routes wired to placeholder screens | 1.1 | route table `SPEC` §6 |
-| 1.4 | `tokens.css` + `base.css` + Tailwind `@theme` + self-hosted Montserrat/Inter | 1.1 | `DESIGN` §2–3 |
-| 1.5 | TopBar + NavPill + Breadcrumbs + Button + Toast shells | 1.4 | |
-| 1.6 | `scripts/import-reference-data.mjs` → `src/assets/data/*.json` + image copy | 0.x | schema v2, `SPEC` §7.1 |
-| 1.7 | `scripts/check-parity.mjs` + vitest parity test | 1.6 | asserts 436 / 4,225 / golden records |
-| 1.8 | Dev-vs-release behaviour: fullscreen only in release, windowed 1600×900 in dev | 1.2 | |
+| # | Task | Status |
+|---|---|---|
+| 1.1 | Vite + React 19 + TS + Tailwind v4 + ESLint/Prettier + Vitest | ✅ |
+| 1.2 | `src-tauri` Tauri 2 shell: window config, CSP, asset protocol scope, capabilities | ✅ |
+| 1.3 | Hash router with all nine routes (+ error boundary, unknown → destinations) | ✅ |
+| 1.4 | `tokens.css` + `base.css` + `components.css` + Tailwind `@theme` + self-hosted fonts | ✅ (stylesheet import fixed 2026-11-26) |
+| 1.5 | TopBar + chapter nav + Breadcrumbs + button system + Toast | ✅ |
+| 1.6 | `scripts/import-reference-data.mjs` → `public/data/*.json` + image copy | ✅ |
+| 1.7 | `scripts/check-parity.mjs` + vitest parity test | ✅ |
+| 1.8 | Dev-vs-release behaviour: fullscreen only in release, windowed 1600×900 in dev | ✅ code · ⏳ verify in a release build |
 
 **Gate G1:** `npm run tauri dev` opens windowed; release build opens fullscreen on the welcome
 screen with the correct tokens, fonts and nav. `npm test` proves the bundled snapshot matches the
-reference data.
+reference data. — *tests ✅; release-build check ⏳.*
 
 ---
 
-## M2 — Data foundation (≈3 d)
+## M2 — Data foundation (≈3 d)  ✅
 
-| # | Task | Depends | Notes |
-|---|---|---|---|
-| 2.1 | `src/data/types.ts` (schema v2) + `content.ts` (COUNTRIES, SERVICES, WHY, STEPS, DOCS, CONTACT ported verbatim) | 1.6 | `SPEC` §7, §5 FR-16 |
-| 2.2 | Bundle loader: `catalogue_active()` command + asset-protocol reads + store | 1.2 | never block startup |
-| 2.3 | Index maps (by key, by id, by country) + memoised selectors | 2.1 | NFR-03 |
-| 2.4 | Per-country detail loader with session cache + failure fallback | 2.2 | FR-18 |
-| 2.5 | Filter engine: scope state, chips, budget, extras, sort, paging | 2.3 | FR-10, parity with `match()` |
-| 2.6 | Unit tests: filters, currency/US$ conversion, duration/date formatting, intake freshness | 2.5 | FR-23, NFR-16 |
-| 2.7 | `RichText` allowlist renderer + fixture tests (XSS payloads) | 2.1 | FR-26 |
-| 2.8 | Logo loader with crest fallback + disk cache hooks (cache impl in M6) | 2.2 | FR-22 |
+| # | Task | Status |
+|---|---|---|
+| 2.1 | `src/data/types.ts` (schema v2) + `content.ts` (copy ported verbatim; `CONTACT_DETAILS`) | ✅ |
+| 2.2 | Bundle loader: `catalogue_active()` command (stub until M6) + asset-protocol reads + store | ✅ |
+| 2.3 | Index maps + selectors (incl. `countrySummary` for FR-28) | ✅ |
+| 2.4 | Per-country detail loader with session cache + failure fallback | ✅ |
+| 2.5 | Filter engine: scope state, chips, budget, extras, sort, paging | ✅ (stable-selector + inherit fixes 2026-11-26) |
+| 2.6 | Unit tests: filters, currency/US$, duration/date formatting, intake freshness | ✅ |
+| 2.7 | `RichText` allowlist renderer + XSS fixture tests | ✅ |
+| 2.8 | Logo loader with crest fallback (disk cache in M6) | ✅ |
 
-**Gate G2:** data drives every screen from the bundled snapshot with zero network; parity and
+**Gate G2:** ✅ data drives every screen from the bundled snapshot with zero network; parity and
 filter tests green.
 
 ---
 
-## M3 — Screen parity (≈5 d)
+## M3 — Screen parity (≈5 d)  ✅ (sign-off ⏳)
 
-Order follows the consultant's conversation; each task ends with a side-by-side check at
-1920×1080 against `reference/`.
-
-| # | Task | FR |
-|---|---|---|
-| 3.1 | `Welcome` (hero, stats, contact) | FR-01 |
-| 3.2 | `Destinations` (5-up cards, counts) | FR-02 |
-| 3.3 | `Country` + tabs + fact strip + Why/Visa bodies | FR-03 |
-| 3.4 | `Country → Universities` (rail + result grid + sort + paging) | FR-10 |
-| 3.5 | `University` (hero, facts, About/Read more, At a glance, course list, inherited filters) | FR-04 |
-| 3.6 | `Course` (kv grid, overview, intakes, work panel, shortlist, stepper) | FR-05 |
-| 3.7 | `CourseFinder` (global search, US$ budget, paging) | FR-06 |
-| 3.8 | `Shortlist` (table, copy summary, reset) | FR-07 |
-| 3.9 | `Services`, `Journey` (verbatim content) | FR-08, FR-09 |
-| 3.10 | Idle reset with fake-timer tests | FR-12 |
-| 3.11 | Keyboard map (Esc/Home/←/→) + toast behaviours | FR-13, FR-15 |
-| 3.12 | Visual parity sign-off checklist per route | all |
+| # | Task | FR | Status |
+|---|---|---|---|
+| 3.1 | `Welcome` | FR-01 | ✅ |
+| 3.2 | `Destinations` | FR-02 | ✅ |
+| 3.3 | `Country` + tabs + facts + Why/Visa | FR-03 | ✅ |
+| 3.4 | `Country → Universities` (rail + grid + sort + paging) | FR-10 | ✅ |
+| 3.5 | `University` | FR-04 | ✅ |
+| 3.6 | `Course` | FR-05 | ✅ |
+| 3.7 | `CourseFinder` | FR-06 | ✅ |
+| 3.8 | `Shortlist` (table, copy summary, reset) | FR-07 | ✅ |
+| 3.9 | `Services`, `Journey` | FR-08, FR-09 | ✅ |
+| 3.10 | Idle reset with fake-timer tests | FR-12 | ✅ |
+| 3.11 | Keyboard map + toast behaviours | FR-13, FR-15 | ✅ |
+| 3.12 | Sign-off per route at 1920×1080 — **now against DESIGN v2**, dark + light | all | ⏳ |
 
 **Gate G3:** a consultant can complete a full consultation with the network unplugged, and the
-parity checklist is signed off route by route.
+sign-off checklist is ticked route by route.
 
 ---
 
-## M4 — Design & motion polish (≈3 d)
+## M4 — Presentation redesign & motion (≈4 d)  ✅ (audit ⏳)
 
-| # | Task | Notes |
+Re-scoped 2026-11-26: the mock's look read as a website; the product replaces a pitch deck
+(SPEC D10/D11). Work items:
+
+| # | Task | Status |
 |---|---|---|
-| 4.1 | `variants.ts` + `usePageTransition` (AnimatePresence on `<main>`) | `DESIGN` §7.3 |
-| 4.2 | Welcome GSAP timeline (hero scale, headline stagger, gold wipe, count-up) | |
-| 4.3 | Destinations stagger + hover scale; country fact/tab motion (`layoutId`) | |
-| 4.4 | Filter re-layout with `layout`, result-set `AnimatePresence`, shortlist badge spring | |
-| 4.5 | Parallax on university hero + direction-aware course stepper | |
-| 4.6 | `useMotionEnabled` single reduced-motion flag across both libraries | NFR-11 |
-| 4.7 | Theme: default dark + Auto/Light/Dark override persisted in `tauri-plugin-store` | FR-25 |
-| 4.8 | Skeletons, empty states, focus rings, aria audit (axe) | NFR-11 |
-| 4.9 | Performance pass: 60 fps, no task > 50 ms, memory < 400 MB | NFR-04/05 |
+| 4.1 | Token system v2: layered surfaces, space scale, radii, elevation, scrims (`DESIGN` §2–4) | ✅ |
+| 4.2 | Chapter navigation (FR-27): numbered pills, sliding ink, shortlist badge, PageUp/PageDown | ✅ + tests |
+| 4.3 | `PageHeader` slide header on every chapter screen; `Segmented`, `SourceNote`, `Icon`, `ContactLine` | ✅ |
+| 4.4 | Restyle all nine screens (bands + glass tiles, numbered features, visa timeline, FAQ, journey timeline, CTA band, course kv tiles, sticky aside, stepper cards) | ✅ |
+| 4.5 | Destination comparison view (FR-28) + `countrySummary` selector | ✅ + tests |
+| 4.6 | Motion choreography per `DESIGN` §7.3 (GSAP mounts, Motion inks/badge/transitions) | ✅ |
+| 4.7 | Single reduced-motion flag; count-up final value under reduced motion (bug fixed) | ✅ |
+| 4.8 | Theme: default dark + top-bar dark/light toggle persisted in `tauri-plugin-store` | ✅ (`Auto` in M6 popover) |
+| 4.9 | Empty / error states (`EmptyState`, `RouteError`), idle-dialog focus trap | ✅ |
+| 4.10 | Accessibility audit (axe) | ☐ |
+| 4.11 | Performance pass: 60 fps, no task > 50 ms, memory < 400 MB | ☐ ⏳ on office hardware |
 
-**Gate G4:** motion matches `DESIGN §7.3`, reduced-motion pass complete, frame chart clean.
+Dropped: university-hero scroll parallax (scroll-linked motion distracts on a presentation
+screen; `DESIGN` §7.3 no longer lists it).
+
+**Gate G4:** motion matches `DESIGN §7.3`, reduced-motion pass complete, axe clean, frame chart clean.
 
 ---
 
-## M5 — Desktop shell (≈2 d)
+## M5 — Desktop shell (≈2 d)  🟡
 
-| # | Task | Notes |
+| # | Task | Status |
 |---|---|---|
-| 5.1 | `window.rs`: fullscreen defaults, `--kiosk` (decorations off, always-on-top, cursor hidden, F11 inert) | FR-14 |
-| 5.2 | Global shortcuts F11 / Ctrl-Cmd+Q via `tauri-plugin-global-shortcut` | FR-13 |
-| 5.3 | External links through `tauri-plugin-opener` (https/mailto only), never inside the app | parity with mock |
-| 5.4 | Clipboard write for “Copy summary” via `tauri-plugin-clipboard-manager` + capability | FR-07 |
-| 5.5 | CSP finalisation (`default-src 'self' asset:`, `img-src 'self' https: data:`, `connect-src` limited to the two raw hosts + release host) | NFR-08 |
-| 5.6 | Icons, app metadata, identifiers, product name, version `2.0.0` | |
-| 5.7 | Window close/quit behaviour: `window-all-closed` quits (mock parity) | |
+| 5.1 | `window.rs`: fullscreen defaults, `--kiosk` (`LaunchMode`, unit-tested) | ✅ |
+| 5.2 | F11 / Ctrl-Cmd+Q / PageUp / PageDown handled in the webview + `shell_info`, `app_quit` commands (replaces `tauri-plugin-global-shortcut`, SPEC D12) | ✅ |
+| 5.3 | External links — none exist in the product; `tauri-plugin-opener` not needed (SPEC D12) | ✅ n/a |
+| 5.4 | Clipboard write for “Copy summary” via `tauri-plugin-clipboard-manager` + capability | ✅ |
+| 5.5 | CSP finalisation (`connect-src` limited to the two raw hosts + release host) | ☐ with M6.2 |
+| 5.6 | Icons, app metadata, identifiers, product name, version `2.0.0` | ✅ (final LGA icon artwork ⏳) |
+| 5.7 | Window close/quit behaviour: closing the window quits (mock parity) | ✅ |
 
-**Gate G5:** kiosk run-through on a large screen: no way out except `Ctrl/Cmd+Q`; external links
-open the system browser; CSP violations = 0 in the console.
+**Gate G5:** kiosk run-through on a large screen: no way out except `Ctrl/Cmd+Q`; CSP
+violations = 0 in the console. — ⏳
 
 ---
 
@@ -192,9 +212,9 @@ M0 → M1 → M2 → M3 → M4 → M5 → M6 → M7 → M8
               └───────────────┘        └─ M7 needs M6? no: M7 depends on M5 only
 ```
 M4 (motion) and M5 (shell) can run in parallel after M3. M6 depends on M2 (data loaders) and M5
-(CSP/opener capabilities). M7 depends on M5 (window/plugins) but not on M6.
+(CSP capabilities). M7 depends on M5 (window/plugins) but not on M6.
 
-**Total: ≈24 ideal days** (M0 1, M1 2, M2 3, M3 5, M4 3, M5 2, M6 4, M7 2, M8 3 incl. review).
+**Total: ≈25 ideal days** (M0 1, M1 2, M2 3, M3 5, M4 4, M5 2, M6 4, M7 2, M8 3 incl. review).
 
 ---
 
@@ -203,12 +223,13 @@ M4 (motion) and M5 (shell) can run in parallel after M3. M6 depends on M2 (data 
 | Package | Purpose | Where recorded |
 |---|---|---|
 | `@tauri-apps/cli` 2, `tauri` 2 (crate) | shell | `PLAN` M1 |
-| `tauri-plugin-updater`, `tauri-plugin-process` | FR-24 | `SPEC` §8.2 |
-| `tauri-plugin-opener`, `tauri-plugin-clipboard-manager`, `tauri-plugin-store`, `tauri-plugin-global-shortcut` | FR-07/14/13/25 | `SPEC` §5, `DESIGN` §2.5 |
+| `tauri-plugin-updater`, `tauri-plugin-process` (JS + crate, added in M7 — not installed before) | FR-24 | `SPEC` §8.2 |
+| `tauri-plugin-clipboard-manager`, `tauri-plugin-store` | FR-07/25 | `SPEC` §5, `DESIGN` §2.5 |
+| ~~`tauri-plugin-opener`, `tauri-plugin-global-shortcut`~~ | removed 2026-11-26 | `SPEC` §12 D12 |
 | `react`, `react-dom` 19, `react-router-dom` 7 | UI + routes | `SPEC` §6 |
 | `zustand` | session/filter/catalogue stores | `SPEC` §5 |
 | `motion` (Motion for React) | component motion | `DESIGN` §7.1 |
-| `gsap` (+ `ScrollTrigger`) | page choreography | `DESIGN` §7.1 |
+| `gsap` (core only) | page choreography | `DESIGN` §7.1 |
 | `tailwindcss` 4 + `@tailwindcss/vite` | styling | `DESIGN` §2 |
 | `html-react-parser` | `RichText` allowlist rendering | `SPEC` FR-26 |
 | `@fontsource/montserrat`, `@fontsource/inter` | offline fonts | `DESIGN` §3 |
@@ -233,7 +254,8 @@ No other runtime dependencies may be introduced without updating this table.
 | R8 | 4K scaling or low-DPI mismatch makes type unreadable | L | M | `clamp()` root scale; verify at 4K in M8.4 | any text < 16 px at 1080p |
 | R9 | Update downloads during a consultation consume bandwidth | M | L | only fingerprint on the 6 h timer; big download starts only after a fingerprint change; progress shown but never blocking | consultant reports lag |
 | R10 | Idle timer frustrates long consultations | M | L | exact parity (4 min + 20 s) + “Continue consultation”; any input while dialog is open keeps the session | consultant feedback |
-| R11 | Electron mock and Tauri app drift during transition | M | M | parity sign-off in M3.12; after G3 the reference becomes documentation only | a FR references mock behaviour that changed |
+| R11 | Electron mock and Tauri app drift during transition | M | M | content/behaviour parity tests; the look is owned by DESIGN v2 (D10); after G3 the reference becomes documentation only | a FR references mock behaviour that changed |
+| R12 | LGA prefers a different chapter order or wording for their pitch | M | L | chapters are one data table (`src/data/chapters.ts`); copy lives in `content.ts` | consultant feedback in sign-off |
 
 ---
 
@@ -246,7 +268,7 @@ No other runtime dependencies may be introduced without updating this table.
 | FR-17, FR-18, FR-21, FR-22, FR-23, FR-26 | M2 | G2 |
 | FR-19, FR-20 | M6 | G6 |
 | FR-24 | M7 | G7 |
-| FR-25 | M4 | G4 |
+| FR-25, FR-27, FR-28 | M4 | G4 |
 | NFR-01…NFR-06 | M4, M8 | G4, G8 |
 | NFR-07…NFR-13 | M5, M6, M8 | G5, G6, G8 |
 | NFR-14…NFR-16 | M7, M8 | G7, G8 |
