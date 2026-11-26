@@ -3,7 +3,7 @@
  * Flat course rows (reference `renderFinder`), paged at `show + 6` and growing by 24.
  */
 
-import { useMemo, useRef } from 'react';
+import { useDeferredValue, useMemo, useRef } from 'react';
 import { CourseRow } from '../components/CourseRow';
 import { EmptyState } from '../components/EmptyState';
 import { FilterRail, type ChipGroup } from '../components/FilterRail';
@@ -32,29 +32,33 @@ export function CourseFinder(): React.JSX.Element {
   const patch = useFilters((s) => s.patch);
 
   const today = isoDate(new Date());
+  // The search box (FilterRail) shows every keystroke at once; the 4,225-course filter runs
+  // on a deferred copy so typing never waits for the result list to re-render.
+  const results = useDeferredValue(state);
   const courses = useMemo(() => {
     if (!index) return [];
     return filterCourses(
       index.catalogue.courses,
       index.universitiesById,
-      state,
+      results,
       matchContext(index, true, today),
       {
         queryIncludesUniversity: true,
       },
     );
-  }, [index, state, today]);
+  }, [index, results, today]);
 
   const institutions = useMemo(() => new Set(courses.map((c) => c.universityId)).size, [courses]);
 
-  const limit = state.show + 6;
+  const limit = results.show + 6;
   const shown = courses.slice(0, limit);
 
   // Rows arrive once with the page; filtering never re-animates them (DESIGN §7.3).
   useMountAnimation(
     root,
     ({ reveal }) => {
-      reveal('#results .course-row', { y: 14, opacity: 0, duration: 0.35, stagger: 0.025 });
+      // One block, not 30 staggered rows: cheap to composite even without a GPU.
+      reveal('#results', { y: 12, opacity: 0, duration: 0.35 });
     },
     [],
   );

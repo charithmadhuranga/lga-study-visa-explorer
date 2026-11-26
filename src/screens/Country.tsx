@@ -6,7 +6,7 @@
  * the active bundle; copy from `content.ts`.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { FilterRail, type ChipGroup } from '../components/FilterRail';
@@ -144,11 +144,13 @@ function Universities({
     };
   }, [index, catalogue, country.id, today]);
 
+  // Filters update instantly in the rail; the result grid follows on a deferred copy.
+  const results = useDeferredValue(state);
   const { rows, total } = useMemo(
-    () => institutionResults(index, country.id, state, matchContext(index, false, today)),
-    [index, country.id, state, today],
+    () => institutionResults(index, country.id, results, matchContext(index, false, today)),
+    [index, country.id, results, today],
   );
-  const shown = rows.slice(0, state.show);
+  const shown = rows.slice(0, results.show);
 
   return (
     <div className="split">

@@ -257,10 +257,10 @@ component, classes prefixed by the component).
 | Country | title/tagline rise · tiles stagger (the photo itself does not move); tab ink slides |
 | University | fact tiles stagger, logo plate `scale .94→1` |
 | Course | head + kv tiles stagger; ← / → re-mounts content sliding `x ±40` (direction-aware) |
-| Finder | rows animate only when the result *count* changes, never per keystroke |
+| Finder | the result list fades in once as a block on arrival; filtering never re-animates it, and results follow typing via `useDeferredValue` |
 | Shortlist | table `layout` spring on add/remove; top-bar badge pops on count change |
 | Next steps | timeline steps stagger, CTA band rises |
-| Global | `<main>` exits 0.16 s, jumps (instantly, never smooth) to the top, then fades/rises 16 px in 0.32 s; chapter ink slides |
+| Global | the old `<main>` leaves instantly, the view jumps (never smooth-scrolls) to the top, the new page fades/rises 16 px in 0.32 s; chapter ink slides |
 | Idle dialog | backdrop fade .25 s, panel `scale .96→1` |
 | Toast | `y 24→0` in .25 s, out .2 s |
 
