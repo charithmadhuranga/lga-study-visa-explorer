@@ -2,7 +2,7 @@
  * Shared e2e helpers: error tracking, "app ready", animation-settle detection and the glitch
  * detectors (stuck elements, overflow, long tasks) the specs assert on.
  */
-import { expect, type Page, type TestInfo } from '@playwright/test';
+import { expect, test, type Page, type TestInfo } from '@playwright/test';
 
 /** Real records from the bundled snapshot. */
 export const IDS = {
@@ -63,6 +63,11 @@ export async function instrument(page: Page): Promise<Tracked> {
       /* WebKit has neither observer — the specs skip those assertions there */
     }
   });
+  // "Office PC" projects: throttle the CPU so slowness shows up here, not in front of a customer.
+  if (test.info().project.name.includes('slow-cpu')) {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  }
   // Remote logos are not part of what we test; never let them slow a run.
   await page.route(/^https:\/\/(photos\.applyboard\.com|[a-z]+\.wikimedia\.org)\//, (route) =>
     route.abort(),
@@ -102,6 +107,10 @@ export async function waitForMotionToSettle(page: Page, timeout = 6000): Promise
       }
       return sig;
     });
+  // The app flags its own GSAP entrances; wait for those to finish first.
+  await page.waitForFunction(() => !document.documentElement.dataset.animating, undefined, {
+    timeout,
+  });
   const until = Date.now() + timeout;
   let previous = await signature();
   while (Date.now() < until) {

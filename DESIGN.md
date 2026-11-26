@@ -200,7 +200,7 @@ component, classes prefixed by the component).
 | `SourceNote` | — | info icon + provenance text above a hairline |
 | `ContactLine` | welcome / CTA | phone, email, web, address with icons |
 | `Toast` | enter/leave | navy pill, gold border, check icon, `aria-live` wrapper |
-| `IdleDialog` | countdown | blurred backdrop, eyebrow, big ringed countdown, focus trapped |
+| `IdleDialog` | countdown | dark backdrop (no blur), eyebrow, big ringed countdown, focus trapped |
 | `CloseButton` | hidden in kiosk | top-bar ✕ (red on hover) → confirmation dialog (same backdrop/panel), **Keep presenting** focused by default |
 | `RouteError` (screen) | — | branded failure inside the shell |
 | `StatusPopover` | chip: `ok` / `busy` (pulsing dot while a check runs) / `warn` (offline) / `error` | glass chip in the top bar (label hides < 1200 px); popover: catalogue + source dates, counts, FX month, retry note, **Check for updates**, Auto/Light/Dark `Segmented` |
@@ -251,10 +251,10 @@ component, classes prefixed by the component).
 
 | Screen | Sequence (plays once on mount) |
 |---|---|
-| Welcome | hero `scale 1.08→1` (1.4 s) · brand drops in · title words rise with .06 s stagger · lead · CTAs · stat tiles stagger · contact fades; stats count up |
+| Welcome | hero fades in (0.8 s, no zoom) · brand drops in · title words rise with .05 s stagger · lead · CTA row · stat tiles stagger · contact fades; stats count up |
 | About LGA | service panels and features rise with stagger |
 | Destinations | cards `y 40→0` stagger .07 s; switching to Compare staggers table rows; hover = lift 6 px + image zoom 1.06 |
-| Country | band photo `scale 1.06→1` · title/tagline rise · tiles stagger; tab ink slides |
+| Country | title/tagline rise · tiles stagger (the photo itself does not move); tab ink slides |
 | University | fact tiles stagger, logo plate `scale .94→1` |
 | Course | head + kv tiles stagger; ← / → re-mounts content sliding `x ±40` (direction-aware) |
 | Finder | rows animate only when the result *count* changes, never per keystroke |
@@ -286,7 +286,10 @@ image zoom; CSS transitions are clamped to ~0 globally.
 ### 7.5 Performance
 
 Transform/opacity only; at most ~12 staggered children per grid; `clearProps` after mount
-tweens; the only `backdrop-filter` is the idle dialog; no task > 50 ms during a transition.
+tweens; **no `backdrop-filter`** and **no zooming of full-screen photos** (both re-raster huge
+areas every frame and stutter on office PCs / software rendering); images use
+`decoding="async"`; derived lists are memoised so typing never recomputes chip options; no
+task > 50 ms during a transition (e2e budget 200 ms, 250 ms on the 4× slow-CPU project).
 
 ---
 

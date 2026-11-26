@@ -18,6 +18,9 @@ All notable changes to LGA Study Visa Explorer. Versions follow [Semantic Versio
 - **Slowness / stalls:** logo lookups no longer run on the UI thread; the bundled catalogue is
   22 % smaller; a fresh install no longer re-downloads the whole catalogue on first launch.
 - Search filtering no longer re-animates the result list on every keystroke.
+- **Smoother on modest hardware:** no more zooming full-screen photos or blurred backdrops;
+  images decode off the UI thread; country and finder filters are computed once instead of on
+  every keystroke (country pages open up to 6× faster on a slow CPU).
 
 ### Added
 - **Close button** in the top bar, with a confirmation so a stray tap can't end a consultation

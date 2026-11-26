@@ -27,7 +27,7 @@ export function UniversityCard({
   return (
     <button className="card uni-card" onClick={() => navigate(`/u/${university.id}`)}>
       <div className={photo ? 'uni-card__media' : 'uni-card__media uni-card__media--plain'}>
-        {photo && <img src={photo} alt="" loading="lazy" />}
+        {photo && <img decoding="async" src={photo} alt="" loading="lazy" />}
       </div>
       <div className="card__body">
         <LogoBadge name={university.name} src={university.logoUrl} />

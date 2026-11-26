@@ -59,31 +59,26 @@ export function CourseFinder(): React.JSX.Element {
     [],
   );
 
-  const groups: ChipGroup[] = index
-    ? [
-        {
-          title: 'Destination',
-          key: 'co',
-          options: COUNTRIES.map((c) => ({
-            value: c.id,
-            label: c.name,
-            count: index.coursesByCountry.get(c.id)?.length ?? 0,
-          })),
-        },
-        {
-          title: 'Study level',
-          key: 'lvl',
-          options: levelOptions(index.catalogue.courses, index.catalogue),
-        },
-        { title: 'Field of study', key: 'fld', options: fieldOptions(index.catalogue.courses) },
-        {
-          title: 'Upcoming intake',
-          key: 'mon',
-          options: monthOptions(index.catalogue.courses, today),
-        },
-      ]
-    : [];
-  const budget = index ? budgetConfig(index.catalogue.courses, index.catalogue, 'US$', true) : null;
+  // Options span all 4,225 courses: build them once per catalogue/day, not per keystroke.
+  const { groups, budget } = useMemo(() => {
+    if (!index) return { groups: [] as ChipGroup[], budget: null };
+    const all = index.catalogue.courses;
+    const chipGroups: ChipGroup[] = [
+      {
+        title: 'Destination',
+        key: 'co',
+        options: COUNTRIES.map((c) => ({
+          value: c.id,
+          label: c.name,
+          count: index.coursesByCountry.get(c.id)?.length ?? 0,
+        })),
+      },
+      { title: 'Study level', key: 'lvl', options: levelOptions(all, index.catalogue) },
+      { title: 'Field of study', key: 'fld', options: fieldOptions(all) },
+      { title: 'Upcoming intake', key: 'mon', options: monthOptions(all, today) },
+    ];
+    return { groups: chipGroups, budget: budgetConfig(all, index.catalogue, 'US$', true) };
+  }, [index, today]);
 
   return (
     <section ref={root}>

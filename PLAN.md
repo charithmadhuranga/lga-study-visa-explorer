@@ -224,13 +224,14 @@ windowed), a window that could not be moved, no close button, slow / stuck data 
 
 | # | Task | Status |
 |---|---|---|
-| 9.1 | Playwright suite (`e2e/`): every route, navigation, clicker keys, drill-down, scroll position, rapid navigation, flows, idle reset, close dialog, performance; glitch detectors for stuck elements, overflow, long tasks, console errors | ✅ 28 specs × 5 projects (Chromium + WebKit; fullscreen, windowed, reduced motion) |
+| 9.1 | Playwright suite (`e2e/`): every route, navigation, clicker keys, drill-down, scroll position, rapid navigation, flows, idle reset, close dialog, performance; glitch detectors for stuck elements, overflow, long tasks, console errors | ✅ 28 specs × 6 projects (Chromium + WebKit; fullscreen, windowed, slow CPU, reduced motion) |
 | 9.2 | Mount animations via `useMountAnimation`: layout effect (no flash), CSS transitions suspended during GSAP, props cleared; finder never re-animates on filtering | ✅ |
 | 9.3 | Navigation: instant scroll-to-top (no smooth scroll racing the transition); faster page transition (0.16 s out / 0.32 s in) | ✅ |
 | 9.4 | Window: decorations only removed in kiosk (movable/closable after F11), hidden until configured, min size; Close button with confirmation (hidden in kiosk) | ✅ |
 | 9.5 | Linux: `WEBKIT_DISABLE_DMABUF_RENDERER=1` (NVIDIA/WebKitGTK flicker) | ✅ |
 | 9.6 | Data: `logo_src`/`catalogue_active` async (off the UI thread), logo lookup by direct stat; minified snapshot (catalogue 3.25 → 2.54 MB); snapshot carries the real upstream `generatedAt`, so a fresh install no longer re-downloads identical data on first launch | ✅ |
 | 9.7 | CI: `e2e` job runs the full suite in Chromium and WebKit, uploads report + traces on failure | ✅ |
+| 9.8 | Weak-hardware pass (found by CI's GPU-less WebKit and a new 4× slow-CPU Chromium project): no full-screen photo zooms or backdrop blur; `decoding="async"` images; memoised country/finder chip options and results; `<html data-animating>` signal so tests wait for real completion | ✅ Canada page freeze 363 → ≤ 63 ms, finder 117 → ~55 ms, typing 1,350 → ~920 ms (4× throttled) |
 
 Measured (Chromium, production build): every route ready 0.5–1.1 s cold; no task ≥ 50 ms on
 route changes; search keeps up with typing. WebKit: all specs green.

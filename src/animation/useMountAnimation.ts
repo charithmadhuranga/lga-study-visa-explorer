@@ -9,6 +9,8 @@
  *    every inline style it set when done, so hover effects work again afterwards.
  * 3. Scoped to the screen root with `gsap.context()` and reverted on unmount (AGENTS §3.5).
  * 4. Reduced motion: nothing runs; elements are simply in their final state.
+ * 5. While any entrance is running, `<html data-animating>` is set — the e2e suite waits on it
+ *    instead of guessing from frame samples (which mislead when a slow machine drops frames).
  */
 
 import { useLayoutEffect, type RefObject } from 'react';
@@ -23,6 +25,13 @@ export interface Reveal {
 
 const CLEAR = 'transform,opacity,transition,visibility';
 
+let running = 0;
+function track(delta: 1 | -1): void {
+  running = Math.max(0, running + delta);
+  if (running) document.documentElement.dataset.animating = String(running);
+  else delete document.documentElement.dataset.animating;
+}
+
 export function useMountAnimation(
   root: RefObject<HTMLElement | null>,
   build: (r: Reveal) => void,
@@ -32,8 +41,14 @@ export function useMountAnimation(
 
   useLayoutEffect(() => {
     if (!enabled || !root.current) return;
+    let active = true;
+    track(1);
+    const done = (): void => {
+      if (active) track(-1);
+      active = false;
+    };
     const ctx = gsap.context(() => {
-      const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      const timeline = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: done });
       const reveal: Reveal['reveal'] = (targets, vars, position) => {
         const els = gsap.utils.toArray<HTMLElement>(targets);
         if (!els.length) return;
@@ -51,8 +66,12 @@ export function useMountAnimation(
         );
       };
       build({ reveal, timeline });
+      if (!timeline.getChildren().length) done();
     }, root);
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      done();
+    };
     // `build` is intentionally excluded: screens pass an inline function; `deps` decides re-runs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, ...deps]);

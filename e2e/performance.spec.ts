@@ -14,8 +14,12 @@ import {
   waitForMotionToSettle,
 } from './helpers';
 
-/** A task this long is a visible freeze. NFR-04 targets 50 ms on the office PC. */
-const FREEZE_MS = 200;
+/**
+ * A task this long is a visible freeze. NFR-04 targets 50 ms on the office PC; budgets here
+ * leave headroom for parallel test workers sharing the CPU. The slow-CPU project (4× throttle)
+ * gets 250 ms — about 60 ms on a normal CPU (measured in isolation: ~75 ms throttled).
+ */
+const freezeBudget = (project: string): number => (project.includes('slow-cpu') ? 250 : 200);
 
 test('route changes never freeze the UI', async ({ page }, info) => {
   test.skip(!isChromium(info), 'Long Tasks API is Chromium-only');
@@ -47,7 +51,9 @@ test('route changes never freeze the UI', async ({ page }, info) => {
     description: `longest task per route (ms): ${JSON.stringify(Object.fromEntries(Object.entries(worst).map(([k, v]) => [k, Math.round(v)])))}`,
   });
   for (const [hash, ms] of Object.entries(worst)) {
-    expect(ms, `${hash} longest task ${Math.round(ms)} ms`).toBeLessThan(FREEZE_MS);
+    expect(ms, `${hash} longest task ${Math.round(ms)} ms`).toBeLessThan(
+      freezeBudget(info.project.name),
+    );
   }
 });
 
@@ -67,7 +73,9 @@ test('course finder search responds while typing', async ({ page }, info) => {
   expect(elapsed, `typing + results took ${elapsed} ms`).toBeLessThan(2500);
   if (isChromium(info)) {
     const worst = Math.max(0, ...(await longTasks(page)));
-    expect(worst, `longest task while typing ${Math.round(worst)} ms`).toBeLessThan(FREEZE_MS);
+    expect(worst, `longest task while typing ${Math.round(worst)} ms`).toBeLessThan(
+      freezeBudget(info.project.name),
+    );
   }
 });
 
@@ -86,7 +94,9 @@ test('filter chips and paging respond immediately', async ({ page }, info) => {
   await expect(page.locator('.results-head h2')).toHaveText(before ?? '');
   if (isChromium(info)) {
     const worst = Math.max(0, ...(await longTasks(page)));
-    expect(worst, `longest task ${Math.round(worst)} ms`).toBeLessThan(FREEZE_MS);
+    expect(worst, `longest task ${Math.round(worst)} ms`).toBeLessThan(
+      freezeBudget(info.project.name),
+    );
   }
 });
 

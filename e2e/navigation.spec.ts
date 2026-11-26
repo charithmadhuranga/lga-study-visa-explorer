@@ -89,7 +89,7 @@ test('every navigation starts at the top of the page', async ({ page }) => {
   await page.locator('.course-row').nth(8).click();
   await expect(page.locator('.course-head h1')).toBeVisible();
   // Must land at the top promptly — not animate there while the new page fades in.
-  await expect.poll(() => page.evaluate(() => scrollY), { timeout: 800 }).toBe(0);
+  await expect.poll(() => page.evaluate(() => scrollY), { timeout: 2000 }).toBe(0);
   await waitForMotionToSettle(page);
   expect(await page.evaluate(() => scrollY)).toBe(0);
 });

@@ -19,7 +19,7 @@
     "lint:fix": "eslint . --fix && prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test --project=chromium-fullscreen --project=chromium-windowed --project=chromium-reduced-motion",
+    "e2e": "playwright test --project=chromium-fullscreen --project=chromium-windowed --project=chromium-slow-cpu --project=chromium-reduced-motion",
     "e2e:all": "playwright test",
     "data:import": "node scripts/import-reference-data.mjs",
     "data:parity": "node scripts/check-parity.mjs",

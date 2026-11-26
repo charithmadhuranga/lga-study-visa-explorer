@@ -36,6 +36,11 @@ export default defineConfig({
     { name: 'chromium-fullscreen', use: { ...devices['Desktop Chrome'], viewport: fullscreen } },
     { name: 'chromium-windowed', use: { ...devices['Desktop Chrome'], viewport: windowed } },
     {
+      // ≈ an older office PC: 4× CPU throttling (see e2e/helpers.ts).
+      name: 'chromium-slow-cpu',
+      use: { ...devices['Desktop Chrome'], viewport: fullscreen },
+    },
+    {
       name: 'chromium-reduced-motion',
       use: { ...devices['Desktop Chrome'], viewport: fullscreen, reducedMotion: 'reduce' },
     },

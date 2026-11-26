@@ -30,7 +30,7 @@ export function TopBar(): React.JSX.Element {
   return (
     <header className="topbar">
       <button className="brand" onClick={() => navigate('/')} aria-label="LGA Visa, welcome screen">
-        <img src={logo} alt="" />
+        <img decoding="async" src={logo} alt="" />
         <span>
           <b>LGA VISA</b>
           <small>STUDY VISA EXPLORER</small>

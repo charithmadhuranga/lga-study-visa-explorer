@@ -102,7 +102,7 @@ npm run typecheck          # tsc --noEmit
 npm run lint               # eslint + prettier --check
 npm run test               # vitest run (unit + component + parity of the JS side)
 npm run test:watch
-npm run e2e                # Playwright on the production build (Chromium: fullscreen, windowed, reduced motion)
+npm run e2e                # Playwright on the production build (Chromium: fullscreen, windowed, 4× slow CPU, reduced motion)
 npm run e2e:all            # + WebKit (needs `npx playwright install --with-deps webkit`)
 npm run build              # tsc && vite build
 npm run tauri build        # release installers + updater artefacts (needs TAURI_SIGNING_PRIVATE_KEY; see the lga-tauri-shell skill)

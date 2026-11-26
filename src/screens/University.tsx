@@ -127,7 +127,7 @@ export function University(): React.JSX.Element {
       />
 
       <div className={photo ? 'uni-hero' : 'uni-hero uni-hero--plain'}>
-        {photo && <img src={photo} alt="" />}
+        {photo && <img decoding="async" src={photo} alt="" />}
         <div className="uni-hero__in">
           <LogoBadge name={university.name} src={university.logoUrl} size="lg" />
           <div>

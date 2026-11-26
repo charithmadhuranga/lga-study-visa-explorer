@@ -6,7 +6,7 @@
  * the active bundle; copy from `content.ts`.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { FilterRail, type ChipGroup } from '../components/FilterRail';
@@ -52,7 +52,6 @@ export function Country(): React.JSX.Element {
   useMountAnimation(
     root,
     ({ reveal }) => {
-      reveal('.band > img', { scale: 1.05, duration: 1, ease: 'power2.out' }, 0);
       reveal('.band h1, .band__tagline', { y: 18, opacity: 0, duration: 0.5, stagger: 0.08 }, 0.05);
       reveal('.tile', { y: 16, opacity: 0, duration: 0.45, stagger: 0.05 }, 0.2);
     },
@@ -69,7 +68,7 @@ export function Country(): React.JSX.Element {
       />
 
       <div className="band">
-        <img src={DEST_IMAGES[country.id]} alt="" />
+        <img decoding="async" src={DEST_IMAGES[country.id]} alt="" />
         <div>
           <div className="eyebrow on-navy">Destination</div>
           <h1>Study in {country.name}</h1>
@@ -126,20 +125,29 @@ function Universities({
   const patch = useFilters((s) => s.patch);
 
   const catalogue = index.catalogue;
-  const unis = index.universitiesByCountry.get(country.id) ?? [];
-  const courses = index.coursesByCountry.get(country.id) ?? [];
   const today = isoDate(new Date());
-  const ctx = matchContext(index, false, today);
 
-  const groups: ChipGroup[] = [
-    { title: 'Region / state', key: 'prov', options: provinceOptions(unis), limit: 10 },
-    { title: 'Study level', key: 'lvl', options: levelOptions(courses, catalogue) },
-    { title: 'Field of study', key: 'fld', options: fieldOptions(courses) },
-    { title: 'Upcoming intake', key: 'mon', options: monthOptions(courses, today) },
-  ];
-  const budget = budgetConfig(courses, catalogue, CUR[country.id], false);
+  // Chip options and the budget range depend only on the country's data — compute them once
+  // per country, not on every render (every keystroke in the search box re-renders).
+  const { groups, budget } = useMemo(() => {
+    const unis = index.universitiesByCountry.get(country.id) ?? [];
+    const courses = index.coursesByCountry.get(country.id) ?? [];
+    const chipGroups: ChipGroup[] = [
+      { title: 'Region / state', key: 'prov', options: provinceOptions(unis), limit: 10 },
+      { title: 'Study level', key: 'lvl', options: levelOptions(courses, catalogue) },
+      { title: 'Field of study', key: 'fld', options: fieldOptions(courses) },
+      { title: 'Upcoming intake', key: 'mon', options: monthOptions(courses, today) },
+    ];
+    return {
+      groups: chipGroups,
+      budget: budgetConfig(courses, catalogue, CUR[country.id], false),
+    };
+  }, [index, catalogue, country.id, today]);
 
-  const { rows, total } = institutionResults(index, country.id, state, ctx);
+  const { rows, total } = useMemo(
+    () => institutionResults(index, country.id, state, matchContext(index, false, today)),
+    [index, country.id, state, today],
+  );
   const shown = rows.slice(0, state.show);
 
   return (

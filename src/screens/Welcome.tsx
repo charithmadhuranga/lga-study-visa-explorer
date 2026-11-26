@@ -36,7 +36,7 @@ export function Welcome(): React.JSX.Element {
   useMountAnimation(
     root,
     ({ reveal }) => {
-      reveal('.welcome__bg', { scale: 1.06, duration: 1.2, ease: 'power2.out' }, 0);
+      reveal('.welcome__bg', { opacity: 0, duration: 0.8, ease: 'power1.out' }, 0);
       reveal('.welcome .brand', { y: -12, opacity: 0, duration: 0.5 }, 0.1);
       reveal('.welcome .eyebrow', { opacity: 0, duration: 0.4 }, 0.15);
       reveal('.welcome__title .word', { y: 36, opacity: 0, duration: 0.6, stagger: 0.05 }, 0.2);
@@ -57,7 +57,7 @@ export function Welcome(): React.JSX.Element {
       <div className="welcome__bg" aria-hidden="true" />
 
       <button className="brand" onClick={() => navigate('/destinations')}>
-        <img src={logo} alt="" />
+        <img decoding="async" src={logo} alt="" />
         <span>
           <b>LGA VISA</b>
           <small>LANKA GLOBAL ACCESS</small>

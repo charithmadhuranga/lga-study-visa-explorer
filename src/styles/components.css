@@ -1873,7 +1873,6 @@ select {
   place-items: center;
   padding: 20px;
   background: var(--backdrop);
-  backdrop-filter: blur(6px);
 }
 .idle-panel {
   max-width: 34rem;

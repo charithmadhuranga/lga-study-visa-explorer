@@ -98,7 +98,7 @@ function Cards({ index }: { index: CatalogueIndex | null }): React.JSX.Element {
             onClick={() => navigate(`/c/${country.id}`)}
             aria-label={`${country.name}: ${country.facts[0][0]} post-study work`}
           >
-            <img src={DEST_IMAGES[country.id]} alt="" />
+            <img decoding="async" src={DEST_IMAGES[country.id]} alt="" />
             <div className="dest-card__body">
               <h2 className="dest-card__name">{country.name}</h2>
               <ul className="dest-card__facts">
@@ -217,7 +217,7 @@ function Compare({ index }: { index: CatalogueIndex | null }): React.JSX.Element
             {summaries.map(({ country }) => (
               <th key={country.id} scope="col">
                 <button className="compare__head" onClick={() => navigate(`/c/${country.id}`)}>
-                  <img src={DEST_IMAGES[country.id]} alt="" />
+                  <img decoding="async" src={DEST_IMAGES[country.id]} alt="" />
                   <strong>{country.name}</strong>
                 </button>
               </th>

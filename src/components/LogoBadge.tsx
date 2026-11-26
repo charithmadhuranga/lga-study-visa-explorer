@@ -35,7 +35,7 @@ export function LogoBadge({ name, src, size = 'md' }: LogoBadgeProps): React.JSX
   return (
     <div className={size === 'lg' ? 'logo logo--lg' : 'logo'} aria-hidden="true">
       {pending ? null : url && !failed ? (
-        <img src={url} alt="" loading="lazy" onError={() => setFailed(true)} />
+        <img decoding="async" src={url} alt="" loading="lazy" onError={() => setFailed(true)} />
       ) : (
         <span className="crest">{initials(name)}</span>
       )}
