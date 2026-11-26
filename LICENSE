@@ -1,0 +1,93 @@
+LGA Study Visa Explorer — Proprietary Source-Available Licence
+Version 1.0, 26 November 2026
+
+Copyright (c) 2026 Lanka Global Access (Private) Limited, trading as "LGA Visa",
+1st Floor, 464 High Level Road, Nugegoda, Sri Lanka. All rights reserved.
+
+1. Definitions
+
+   "Software" means the LGA Study Visa Explorer application in source and binary form,
+   including its source code, documentation, design system, user-interface designs, text,
+   build scripts, configuration and any compiled installers, together with any modifications
+   or derivative works of any of them.
+
+   "Company" means Lanka Global Access (Private) Limited and its successors and assigns.
+
+   "Commercial Use" means any use of the Software, in whole or in part, that is intended for
+   or directed toward commercial advantage or monetary compensation, whether direct or
+   indirect, including without limitation: using the Software in the course of operating a
+   business; providing student-visa, migration, education-agency, admissions or consulting
+   services with the help of the Software; offering the Software or any service built on it
+   to third parties; selling, licensing, renting, hosting or distributing the Software; and
+   incorporating the Software or any part of it into another product or service.
+
+   "Permission" means a prior written licence agreement signed by an authorised officer of
+   the Company. No other communication, conduct or course of dealing constitutes Permission.
+
+2. Ownership
+
+   The Software is licensed, not sold. The Company retains all right, title and interest in
+   and to the Software, including all copyright, trade-mark and other intellectual-property
+   rights. "LGA", "LGA Visa", "Lanka Global Access" and the LGA logo are trade marks of the
+   Company and may not be used without Permission.
+
+3. What you may do without Permission
+
+   Subject to the conditions in this Licence, you may, free of charge:
+
+   (a) view and read the source code in this repository; and
+   (b) download, build and run the Software privately, solely for personal, non-commercial
+       study, evaluation or security research,
+
+   provided that this Licence and all copyright notices are kept intact in every copy.
+
+4. What requires Permission
+
+   You may NOT, without Permission from the Company:
+
+   (a) make any Commercial Use of the Software;
+   (b) copy, modify, adapt, translate or create derivative works of the Software, other than
+       transient copies made while exercising Section 3;
+   (c) distribute, publish, sublicense, sell, rent, lease, lend or otherwise make the
+       Software or any derivative work available to any third party;
+   (d) host, operate or provide the Software, or any functionality of it, as a service;
+   (e) remove, alter or obscure any copyright, trade-mark or licence notice; or
+   (f) use the Software or any part of it to build, train or improve a competing product or
+       service.
+
+   Requests for Permission should be sent to admin@lgavisa.com.
+
+5. Third-party material
+
+   The Software contains and depends on material owned by others, which is NOT licensed to
+   you by the Company under this Licence and remains subject to its owners' terms. This
+   includes open-source libraries and fonts (each under its own licence, listed in the
+   project's package manifests), university and institution names, logos and descriptions,
+   course information, and photographs. Nothing in this Licence grants any right in such
+   material.
+
+6. Contributions
+
+   Unless agreed otherwise in writing, any contribution you submit to this repository (for
+   example a pull request) is assigned to the Company, and you confirm you have the right to
+   make that assignment.
+
+7. Termination
+
+   This Licence terminates automatically, without notice, if you breach any of its terms.
+   On termination you must stop all use of the Software and destroy all copies in your
+   possession or control. Sections 2, 5, 7, 8 and 9 survive termination.
+
+8. Disclaimer of warranty and limitation of liability
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+   INCLUDING WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+   PURPOSE AND NON-INFRINGEMENT. COURSE, FEE, INTAKE, VISA AND WORK-RIGHTS INFORMATION SHOWN
+   BY THE SOFTWARE IS FOR GUIDANCE ONLY AND MAY BE INCOMPLETE OR OUT OF DATE. TO THE MAXIMUM
+   EXTENT PERMITTED BY LAW, THE COMPANY SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY ARISING FROM OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+9. Governing law
+
+   This Licence is governed by the laws of the Democratic Socialist Republic of Sri Lanka,
+   and the courts of Sri Lanka have exclusive jurisdiction over any dispute arising from it.
