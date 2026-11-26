@@ -7,3 +7,6 @@ reference/
 package-lock.json
 *.md
 src-tauri/gen
+public/data
+test-results
+playwright-report

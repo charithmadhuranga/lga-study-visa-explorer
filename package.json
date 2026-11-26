@@ -19,6 +19,8 @@
     "lint:fix": "eslint . --fix && prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "e2e": "playwright test --project=chromium-fullscreen --project=chromium-windowed --project=chromium-reduced-motion",
+    "e2e:all": "playwright test",
     "data:import": "node scripts/import-reference-data.mjs",
     "data:parity": "node scripts/check-parity.mjs",
     "data:parity:upstream": "cargo test --manifest-path src-tauri/Cargo.toml --test upstream_parity -- --nocapture"
@@ -41,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@tauri-apps/cli": "^2.12.6",
     "@testing-library/dom": "^10.4.1",

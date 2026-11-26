@@ -9,3 +9,5 @@ src-tauri/target/
 coverage/
 .vite/
 *.tsbuildinfo
+test-results/
+playwright-report/
