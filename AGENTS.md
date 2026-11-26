@@ -46,8 +46,10 @@ src/
   screens/           Welcome Destinations Country University Course CourseFinder Services Journey Shortlist RouteError
   components/        TopBar PageHeader Segmented Breadcrumbs FilterRail UniversityCard CourseRow LogoBadge
                      Icon SourceNote ContactLine EmptyState Pager RichText Toast IdleDialog StatusPopover
+                     AppVersion UpdateBanner
   data/              types.ts  content.ts  chapters.ts  images.ts  catalogue.ts (loaders)  logos.ts  selectors.ts  filters.ts  format.ts  photos.ts
   store/             session.ts  filters.ts  catalogue.ts  appearance.ts  updates.ts (catalogue updater status + hot-swap)
+                     appUpdate.ts (app self-update, FR-24)
   hooks/             useGlobalKeys.ts (Esc/Home/PageUp/PageDown/F11/Ctrl+Q)  useIdleTimer.ts
   shell/             window.ts (fullscreen, quit, kiosk info — the only code that talks to window APIs)
   animation/         variants.ts  usePageTransition.ts  useCountUp.ts  useMotionEnabled.ts
@@ -59,7 +61,10 @@ src-tauri/src/
 src-tauri/tests/
   upstream_parity.rs   Rust transform vs bundled snapshot (LGA_UPSTREAM_DIR) + opt-in live network tests
   commands.rs        catalogue_*, updater_*, clipboard, open_external
-  updater.rs         app self-update glue
+  (app self-update uses tauri-plugin-updater/process from the frontend; no Rust glue needed)
+.github/workflows/
+  ci.yml             checks on every push / PR (NFR-15)
+  release.yml        tag vX.Y.Z → signed installers + latest.json in a DRAFT release; manual run = dry run
 scripts/
   import-reference-data.mjs   reference/data/*.js  →  src/assets/data/*.json (+ images)
   check-parity.mjs            asserts the snapshot matches reference counts and golden records
@@ -97,7 +102,7 @@ npm run lint               # eslint + prettier --check
 npm run test               # vitest run (unit + component + parity of the JS side)
 npm run test:watch
 npm run build              # tsc && vite build
-npm run tauri build        # release installers + updater artefacts
+npm run tauri build        # release installers + updater artefacts (needs TAURI_SIGNING_PRIVATE_KEY; see the lga-tauri-shell skill)
 
 # rust
 cargo test --manifest-path src-tauri/Cargo.toml

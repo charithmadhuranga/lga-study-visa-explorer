@@ -387,7 +387,9 @@ For QA, `LGA_CATALOGUE_SOURCE` may point at a local `processed/` directory or an
 
 - `bundle.createUpdaterArtifacts: true`; `plugins.updater.pubkey` pinned in `tauri.conf.json`;
   signing key only via `TAURI_SIGNING_PRIVATE_KEY` env var in CI (`.env` files are ignored by Tauri).
-- Endpoint: `https://github.com/<owner>/lga-study-visa-explorer/releases/latest/download/latest.json`
+- Endpoint: `https://github.com/charithmadhuranga/lga-study-visa-explorer/releases/latest/download/latest.json`
+  (`tauri-action` writes `latest.json` into a **draft** release on tag `vX.Y.Z`; installed apps see
+  it only after the draft is reviewed and published).
   (static JSON, `platforms` keys `windows-x86_64`, `darwin-aarch64`, `darwin-x86_64`, `linux-x86_64`).
 - Flow: check on launch (10 s delay) + every 24 h + **Check for app update** → banner →
   `downloadAndInstall()` on click → `relaunch()` from `@tauri-apps/plugin-process`.

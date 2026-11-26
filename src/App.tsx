@@ -12,6 +12,8 @@ import { useIdleTimer } from './hooks/useIdleTimer';
 import { useCatalogue } from './store/catalogue';
 import { useAppearance } from './store/appearance';
 import { useUpdates } from './store/updates';
+import { useAppUpdate } from './store/appUpdate';
+import { UpdateBanner } from './components/UpdateBanner';
 import { pageVariants } from './animation/variants';
 import { useMotionEnabled } from './animation/useMotionEnabled';
 
@@ -26,18 +28,23 @@ export default function App(): React.JSX.Element {
   const error = useCatalogue((s) => s.error);
   const initAppearance = useAppearance((s) => s.init);
   const initUpdates = useUpdates((s) => s.init);
+  const initAppUpdate = useAppUpdate((s) => s.init);
 
   useEffect(() => {
     void initAppearance();
     // The catalogue renders first; the updater listener attaches afterwards (SPEC §8.1).
-    void loadCatalogue().then(() => initUpdates());
-  }, [initAppearance, loadCatalogue, initUpdates]);
+    void loadCatalogue().then(() => {
+      initUpdates();
+      initAppUpdate(); // first app-update check 10 s later (FR-24)
+    });
+  }, [initAppearance, loadCatalogue, initUpdates, initAppUpdate]);
 
   const isWelcome = location.pathname === '/' || location.pathname === '/welcome';
 
   return (
     <>
       {!isWelcome && <TopBar />}
+      {!isWelcome && <UpdateBanner />}
       <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
         <motion.main
           key={location.pathname}

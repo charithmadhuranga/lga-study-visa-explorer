@@ -37,6 +37,10 @@ describe('catalogue status chip (FR-20)', () => {
     });
   });
 
+  it('has no dangling separator before the catalogue has loaded', () => {
+    expect(statusChip(status('bundled'), undefined).label).toBe('Catalogue');
+  });
+
   it('dates come from the bundle passed in, never a constant', () => {
     expect(statusChip(status('up-to-date'), '2027-03-05').label).toBe('Up to date · 5 Mar 2027');
   });

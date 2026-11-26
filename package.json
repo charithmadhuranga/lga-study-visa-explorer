@@ -6,7 +6,7 @@
   "type": "module",
   "description": "Full-screen consultation screen for LGA Visa: destinations, universities and courses",
   "author": "Lanka Global Access (Pvt) Ltd",
-  "license": "UNLICENSED",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "vite",
     "tauri": "tauri",
@@ -28,7 +28,9 @@
     "@fontsource/montserrat": "^5.3.0",
     "@tauri-apps/api": "^2.12.5",
     "@tauri-apps/plugin-clipboard-manager": "^2.5.0",
+    "@tauri-apps/plugin-process": "^2.4.0",
     "@tauri-apps/plugin-store": "^2.5.1",
+    "@tauri-apps/plugin-updater": "^2.14.1",
     "gsap": "^3.15.1",
     "html-react-parser": "^6.1.10",
     "motion": "^14.14.0",

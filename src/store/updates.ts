@@ -140,6 +140,6 @@ export function statusChip(
     case 'failed':
       return { label: 'Update failed — retrying', tone: 'error' };
     default:
-      return { label: `Catalogue · ${date}`, tone: 'ok' };
+      return { label: date ? `Catalogue · ${date}` : 'Catalogue', tone: 'ok' };
   }
 }

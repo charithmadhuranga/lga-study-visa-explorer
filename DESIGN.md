@@ -203,7 +203,8 @@ component, classes prefixed by the component).
 | `IdleDialog` | countdown | blurred backdrop, eyebrow, big ringed countdown, focus trapped |
 | `RouteError` (screen) | — | branded failure inside the shell |
 | `StatusPopover` | chip: `ok` / `busy` (pulsing dot while a check runs) / `warn` (offline) / `error` | glass chip in the top bar (label hides < 1200 px); popover: catalogue + source dates, counts, FX month, retry note, **Check for updates**, Auto/Light/Dark `Segmented` |
-| `UpdateBanner` *(M7)* | dismissible | "Version x ready — Restart to apply" |
+| `UpdateBanner` | offer / downloading (%) / restarting | sticky navy2 strip under the top bar with a gold inset edge: "Version x is ready … best between consultations" + **Restart & update** / **Later** (hides that version) |
+| `AppVersion` | — | status popover section: app version, **Check for app update**, feedback only for manual checks |
 
 ---
 

@@ -26,6 +26,8 @@ tracing-subscriber = { version = "0.3.23", default-features = false, features = 
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
 tokio = { version = "1.54.1", features = ["time", "sync", "macros", "rt", "fs", "io-util"] }
 reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "gzip"] }
+tauri-plugin-updater = "2.14.1"
+tauri-plugin-process = "2.4.0"
 
 [profile.dev]
 # The webview bundle is what matters in dev; keep Rust builds fast.

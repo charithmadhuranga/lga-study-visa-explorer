@@ -1,0 +1,107 @@
+# Signed installers + the updater feed (SPEC §8.2, FR-24, PLAN 7.2/7.4).
+#
+# * Push a tag `vX.Y.Z` (matching package.json) → builds all platforms, signs the updater
+#   artefacts and creates a DRAFT GitHub release with `latest.json`. Installed apps see the
+#   update only after someone reviews and publishes the draft.
+# * Run manually (workflow_dispatch) → the same builds, uploaded as workflow artefacts only:
+#   a dry run of the whole pipeline, no release, nothing reaches installed apps.
+#
+# Secrets: TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD (never in the repo).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            name: windows-x64
+            args: --bundles nsis
+          - platform: macos-latest
+            name: macos-arm64
+            args: --target aarch64-apple-darwin
+            rust_target: aarch64-apple-darwin
+          - platform: macos-latest
+            name: macos-x64
+            args: --target x86_64-apple-darwin
+            rust_target: x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            name: linux-x64
+            args: --bundles appimage,deb
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tag must match the app version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          conf=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != package.json $version"; exit 1; }
+          test "$version" = "$conf" || { echo "tauri.conf.json $conf != package.json $version"; exit 1; }
+
+      - name: Linux build dependencies (Tauri 2)
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: ${{ matrix.name }}
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        id: tauri
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          # Empty on manual runs → build only, no release.
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: LGA Study Visa Explorer ${{ github.ref_name }}
+          releaseBody: |
+            Installers for Windows (x64, NSIS), macOS (Apple silicon and Intel) and Linux (AppImage, deb).
+            Installed apps offer this update in the top bar once the release is published;
+            it installs only when a consultant clicks "Restart & update".
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
+
+      - name: Upload build artefacts (manual dry runs)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lga-study-visa-explorer-${{ matrix.name }}
+          path: |
+            src-tauri/target/**/release/bundle/**/*.exe
+            src-tauri/target/**/release/bundle/**/*.dmg
+            src-tauri/target/**/release/bundle/**/*.tar.gz
+            src-tauri/target/**/release/bundle/**/*.AppImage
+            src-tauri/target/**/release/bundle/**/*.deb
+            src-tauri/target/**/release/bundle/**/*.sig
+          if-no-files-found: error
+          retention-days: 14

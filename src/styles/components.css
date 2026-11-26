@@ -2011,6 +2011,49 @@ select {
   display: grid;
   gap: 0.4rem;
 }
+.status-pop__app {
+  display: grid;
+  gap: var(--s-2);
+}
+
+/* =====================================================================
+   App update banner (FR-24)
+   ===================================================================== */
+.update-banner {
+  position: sticky;
+  top: var(--bar-h);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: 0.7rem var(--gutter);
+  background: var(--navy2);
+  color: var(--on-navy-lead);
+  border-bottom: 1px solid var(--on-navy-line);
+  box-shadow: inset 3px 0 0 var(--gold);
+  font-size: 0.92rem;
+}
+.update-banner > svg {
+  flex: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--gold2);
+}
+.update-banner p {
+  flex: 1;
+}
+.update-banner b {
+  color: var(--white);
+}
+.update-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+.update-banner .link-btn {
+  color: var(--gold2);
+}
+
 .btn:disabled {
   opacity: 0.6;
   cursor: default;

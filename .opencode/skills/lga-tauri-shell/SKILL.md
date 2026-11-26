@@ -1,6 +1,6 @@
 ---
 name: LGA Tauri Shell
-description: The Rust desktop shell of LGA Study Visa Explorer - window and fullscreen/kiosk behaviour, shell commands (shell_info, app_quit), CSP and capabilities, plugins (clipboard, store, updater), packaging and signing for Windows/macOS/Linux, and the signed app self-update. Load for any src-tauri or packaging task.
+description: The Rust desktop shell of LGA Study Visa Explorer - window and fullscreen/kiosk behaviour, shell commands (shell_info, app_quit), CSP and capabilities, plugins (clipboard, store, updater, process), packaging and signing for Windows/macOS/Linux, and the signed app self-update. Load for any src-tauri or packaging task.
 ---
 
 # Tauri shell, security and releases
@@ -112,46 +112,72 @@ files itself and exposes them through the asset protocol).
   `clipboard-manager`; fall back to `navigator.clipboard`; on total failure show the existing
   “Copy is not available here” toast — never a silent no-op.
 
-## 6. App self-update (FR-24)
+## 6. App self-update (FR-24) — implemented (M7)
 
-- Plugins: `tauri-plugin-updater` + `tauri-plugin-process` (`relaunch`).
-- Config: `bundle.createUpdaterArtifacts: true`, `plugins.updater.pubkey` (pinned, **not** a file
-  path), `plugins.updater.endpoints: ["https://github.com/<owner>/lga-study-visa-explorer/releases/latest/download/latest.json"]`,
+- Plugins: `tauri-plugin-updater` + `tauri-plugin-process`, registered in `lib.rs`;
+  capabilities `updater:allow-check`, `updater:allow-download-and-install`, `process:allow-restart`.
+- Config (`tauri.conf.json`): `bundle.createUpdaterArtifacts: true`; `plugins.updater.pubkey`
+  (the key's **contents**, pinned); endpoint
+  `https://github.com/charithmadhuranga/lga-study-visa-explorer/releases/latest/download/latest.json`;
   `plugins.updater.windows.installMode: "passive"`.
-- Signing: `TAURI_SIGNING_PRIVATE_KEY` (+ optional `_PASSWORD`) from the environment **only** —
-  `.env` files are ignored by Tauri and must not be used. Losing the key means installed copies can
-  never update again: store it in CI secrets and a password manager.
-- Flow in `updater.rs` + `src/store/`: check 10 s after launch and every 24 h and on demand →
-  show `UpdateBanner` → user clicks → `downloadAndInstall()` with progress → `relaunch()`.
-  **Never install without an explicit click** (a consultant is presenting; Windows additionally
-  kills the process at install time).
-- `latest.json` platform keys: `windows-x86_64`, `darwin-aarch64`, `darwin-x86_64`, `linux-x86_64`.
-  Generate it in CI from the built artefacts (`.sig` contents go in `signature`, not a path).
-- Linux: **AppImage is the only self-updating artefact** — ship it as the office default; deb/rpm
-  get the notice but need a manual reinstall (document this).
+- Frontend: `src/store/appUpdate.ts` (check 10 s after launch, every 24 h, on demand; plugin
+  calls behind `updaterBackend` so tests inject fakes) → `UpdateBanner` under the top bar and
+  `AppVersion` in the status popover → click → `downloadAndInstall()` with progress →
+  `relaunch()`. **Never installs without an explicit click.** A failed check is quiet (popover
+  only); a failed install (e.g. signature mismatch) keeps the offer and shows the error.
+- Linux: **AppImage is the only self-updating artefact**; the `.deb` needs a manual reinstall.
 
-## 7. Packaging matrix (M7/M8)
+### Signing key custody
 
-| OS | Artefact | Notes |
+- Generated 2026-11-26 with `tauri signer generate`, kept **outside the repo** at
+  `~/.tauri/lga-study-visa-explorer.key` (+ `.key.password`, `.key.pub`), mode 600.
+- In GitHub Actions secrets: `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
+- **Back up the key and password in a password manager.** Losing them means installed copies
+  can never update again (they only trust the pinned public key). Never paste either into a
+  file in this repo, an issue, a log or a chat.
+- Local signed build (Linux): `TAURI_SIGNING_PRIVATE_KEY="$(cat ~/.tauri/lga-study-visa-explorer.key)"
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD="$(cat ~/.tauri/lga-study-visa-explorer.key.password)"
+  npx tauri build --bundles appimage`.
+
+## 7. Packaging & release (`.github/workflows/release.yml`)
+
+| OS | Artefact (matrix `args`) | Notes |
 |---|---|---|
-| Windows 10/11 x64 | NSIS `…-setup.exe` (+ `.sig`) | per-machine install, desktop shortcut, oneClick false |
-| macOS 12+ | `.app` + `.dmg`, updater bundle `.app.tar.gz` (+ `.sig`) | arm64 and x86_64 (or universal); unsigned until an Apple Developer account exists — say so in the release notes |
-| Linux | `.AppImage` (+ `.sig`) | optional `.deb`/`.rpm` without auto-update |
+| Windows 10/11 x64 | NSIS `…-setup.exe` + `.sig` (`--bundles nsis`) | passive update install |
+| macOS arm64 / x64 | `.app` + `.dmg`, updater `.app.tar.gz` + `.sig` (`--target …`) | unsigned/not notarised until an Apple Developer account exists (PLAN R6) |
+| Linux x64 | `.AppImage` + `.sig`, `.deb` (`--bundles appimage,deb`) | built on ubuntu-22.04 for glibc reach |
 
-CI (GitHub Actions, `.github/workflows/release.yml`): tag `v*` → matrix build → sign with the CI
-secret → upload artefacts → publish a release containing `latest.json`.
+How to release:
+
+1. Bump the version in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/Cargo.toml`
+   (the workflow refuses a tag that does not match).
+2. `git tag vX.Y.Z && git push origin vX.Y.Z` → all four builds → a **draft** release with the
+   installers, signatures and `latest.json`.
+3. Review the draft, then **Publish** it. Only then do installed apps see the update
+   (`/releases/latest/` ignores drafts and pre-releases).
+
+Dry run: *Actions → Release → Run workflow* builds and signs everything and uploads the
+installers as workflow artefacts — no release, nothing reaches installed apps.
+
+`.github/workflows/ci.yml` runs typecheck, lint, tests, data parity, build, `cargo fmt`,
+`clippy` and `cargo test` on every push to `main` and every pull request (NFR-15).
 
 ## 8. Commands exposed to the frontend
 
 | Command | Purpose |
 |---|---|
-| `catalogue_active()` | returns `{ root, meta }` for the active bundle (asset-protocol reads) |
-| `catalogue_check()` | on-demand fingerprint check (status popover) |
-| `catalogue_status()` | current state for the status chip on boot |
-| `open_external(url)` | validated system-browser open |
-| `app_check_update()` | wraps the updater `check()` for the popover |
+| `catalogue_active()` | `{ root, meta, source }` of the committed bundle, or `null` → embedded snapshot |
+| `catalogue_status()` | current updater state for the status chip on boot |
+| `catalogue_check()` | wake the scheduler now ("Check for updates") |
+| `logo_src(url)` | cached logo path, or `null` (+ background download) — FR-22 |
+| `shell_info()` | `{ kiosk }` — makes F11 inert in kiosk mode |
+| `app_quit()` | Ctrl/Cmd+Q |
 
-Emit events (Rust → JS): `catalogue://progress`, `catalogue://updated`, `catalogue://failed`.
+App updates use the updater/process plugin APIs directly from `src/store/appUpdate.ts`; there is
+no custom command for them. No `open_external` — the product opens no external links (D12).
+
+Events (Rust → JS): `catalogue://status` (every state change, includes download progress),
+`catalogue://updated` (after a commit), `catalogue://failed` (non-offline failures).
 Keep the command surface small; anything else belongs in the frontend.
 
 ## 9. Rust quality bar

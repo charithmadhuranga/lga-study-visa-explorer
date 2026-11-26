@@ -1,7 +1,7 @@
 /**
  * Catalogue status chip + popover (FR-20, FR-21, FR-25). The chip says how fresh the data is;
- * the popover shows where the numbers come from, offers "Check for updates" and the full
- * Auto / Light / Dark appearance choice. Closes on Esc or an outside click.
+ * the popover shows where the numbers come from, offers "Check for updates", the app version
+ * with "Check for app update" (FR-24) and the full Auto / Light / Dark appearance choice. Closes on Esc or an outside click.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -14,6 +14,7 @@ import { useMotionEnabled } from '../animation/useMotionEnabled';
 import { isTauri } from '../data/catalogue';
 import { Segmented } from './Segmented';
 import { Icon } from './Icon';
+import { AppVersion } from './AppVersion';
 
 const BUSY = new Set(['checking', 'downloading', 'installing']);
 
@@ -128,6 +129,8 @@ export function StatusPopover(): React.JSX.Element {
             ) : (
               <p className="muted small">Automatic updates run in the desktop app.</p>
             )}
+
+            <AppVersion />
 
             <div className="status-pop__appearance">
               <span className="small muted">Appearance</span>

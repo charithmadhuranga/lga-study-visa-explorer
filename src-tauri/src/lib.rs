@@ -18,6 +18,9 @@ pub fn run() {
         .manage(mode)
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        // App self-update (FR-24): signed feed, installed only after an explicit click.
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             commands::catalogue_active,
             commands::catalogue_status,
