@@ -197,7 +197,7 @@ While running, the app checks the upstream `summary.json` fingerprint on launch,
 *AC:* a failed/interrupted download never corrupts the active bundle; the previous bundle is retained for rollback; the UI shows a toast “Catalogue updated · N courses · D Mon YYYY”.
 
 **FR-20 Update status + manual check**
-A status chip in the top bar shows the active bundle state: *Updating…* / *Up to date · 23 Nov 2026* / *Offline · showing 23 Nov 2026* / *Update failed — retrying*. Clicking it opens a popover with the bundle date, source repository link, course/university counts, **Check for updates** and **Check for app update**.
+A status chip in the top bar shows the active bundle state: *Checking for updates…* / *Updating catalogue… 42%* / *Up to date · 23 Nov 2026* / *Updated · …* / *Offline · showing 23 Nov 2026* / *Update failed — retrying*. Clicking it opens a popover with the catalogue build date, source data date, course/institution counts, FX month, the retry note, **Check for updates**, the Auto/Light/Dark appearance choice and (M7) **Check for app update**.
 *AC:* every state is reachable in a test by stubbing the network.
 
 **FR-21 Provenance footnotes**
@@ -324,16 +324,14 @@ interface DetailFile {                    // details/<country>.json
 ```
 <APP_DATA>/lga-study-visa-explorer/            # Tauri app_data_dir
 ├── current.json                          # pointer: { schemaVersion, dir, meta }  (atomic write)
-├── bundled/                              # first-run copy of the shipped snapshot
-│   ├── catalogue.json                    # ~1.1 MB
-│   └── details/{uk,australia,canada,new-zealand,usa}.json   # ~6.1 MB total
+│                                         # absent ⇒ the snapshot shipped inside the app (D15)
 ├── updates/
 │   ├── v2/ … vN/                         # produced by the updater; keep last 2
 │   │   ├── catalogue.json
 │   │   ├── details/*.json
 │   │   └── meta.json                     # { built, sourceGeneratedAt, sha256, counts }
-│   └── staging/<uuid>/                   # in-progress download, never referenced by current.json
-└── logos/                                # LRU cache of logoUrl, 50 MB cap
+├── staging/<id>/                         # in-progress download, never referenced by current.json
+└── logos/                                # LRU cache of logoUrl, 50 MB cap (PLAN 6.8)
 ```
 
 The frontend never parses a path from user input: it asks Rust for the active bundle root
@@ -358,13 +356,13 @@ Two independent update paths, both must be safe to run while a consultant is pre
 
 | Step | Behaviour |
 |---|---|
-| Trigger | launch (after UI ready), every 6 h, on-demand command, after a failed check with backoff 1 m → 5 m → 15 m → 1 h |
+| Trigger | 8 s after launch (UI already interactive), every 6 h, on-demand (`catalogue_check`), after a failed check with backoff 1 m → 5 m → 15 m → 1 h (connectivity returning is caught by the backoff) |
 | Fingerprint | `GET …/scraper/data/processed/summary.json` (~1.3 KB) with a cache-busting query param; compare `generatedAt` to `meta.sourceGeneratedAt` |
 | Download | `courses.json` (9.6 MB) + `universities.json` (2.8 MB) into `staging/<uuid>/`, streamed with progress events `catalogue://progress { phase, received, total }` |
-| Validate | JSON parses · `courses.length > 0` · every `universityId` resolves · `fxToUsd.USD === 1.0` · `schemaVersion` sanity · SHA-256 recorded |
+| Validate | JSON parses · `courses.length > 0` · every `universityId` resolves · known levels and countries · unique course keys · `fxToUsd.USD === 1.0` · SHA-256 logged · **the new bundle has ≥ 50 % of the active bundle's courses** (a broken scrape never replaces good data) · if the data files still carry the active `generatedAt` (CDN lag), nothing is committed |
 | Transform | port of `reference/tools/build_data.py` in Rust (§8.3) |
 | Commit | write `updates/v<N>/{catalogue.json,details/*.json,meta.json}`, fsync, then replace `current.json` via write-temp+rename |
-| Notify | emit `catalogue://updated { meta }`; frontend swaps the store in place, re-renders, shows a toast |
+| Notify | `catalogue://status` on every state change (chip); `catalogue://updated { root, meta, source }` after a commit — the frontend swaps the store in place (keeping the old data if the new bundle fails to load), re-renders and toasts “Catalogue updated · N courses · D Mon YYYY” |
 | Failure | delete staging, keep the active bundle, emit `catalogue://failed { reason }`, retry later |
 | Prune | keep the two newest committed versions |
 
@@ -380,7 +378,10 @@ https://raw.githubusercontent.com/charithmadhuranga/visa-website/main/scraper/da
 ```
 
 Deliberately **not** the GitHub API (60 requests/hour per IP is too low for an office full of
-machines). `connect-src` allows only `raw.githubusercontent.com` and `objects.githubusercontent.com`.
+machines). All fetching happens in Rust (`reqwest`, rustls with the OS certificate store), so the
+webview CSP `connect-src` allows **no** external host — only `'self'`, the asset protocol and IPC.
+For QA, `LGA_CATALOGUE_SOURCE` may point at a local `processed/` directory or another base URL
+(Gate G6 synthetic `summary.json` test).
 
 ### 8.2 App binary (manual-confirmed)
 
@@ -412,8 +413,15 @@ machines). `connect-src` allows only `raw.githubusercontent.com` and `objects.gi
 9. Sanitise HTML: allow `p, ul, ol, li, h4, strong, b, em, i, br`; drop `script, style, iframe`
    contents; demote `h1–h3, h5, h6` to `h4`; escape text; remove empty `p/li/h4`.
 10. **No image processing at runtime** (the reference needed Pillow for campus photos): the 24
-    curated campus photos ship in the bundle and are matched by university id; everything else
-    uses the remote `logoUrl` with crest fallback.
+    curated campus photos ship in the bundle; the updater reads which university ids have one
+    from the embedded snapshot and keeps `photo` for exactly those. Everything else uses the
+    remote `logoUrl` with crest fallback.
+11. Course country and currency follow the course's **university** (as the bootstrap snapshot
+    does); course summaries are filed in that country's detail file (D14).
+
+Parity: `npm run data:parity:upstream` (with `LGA_UPSTREAM_DIR`) runs the Rust transform on the
+upstream data the reference was built from and must reproduce the bundled snapshot record for
+record — verified 2026-11-26: 436 universities, 4,225 courses, 4,202 summaries, identical.
 
 ---
 
@@ -484,6 +492,8 @@ machines). `connect-src` allows only `raw.githubusercontent.com` and `objects.gi
 | D11 | Navigation is five numbered chapters in pitch order (About LGA first) instead of the mock's four pills + shortlist | mirrors how consultants tell the story; clicker support (FR-27) |
 | D12 | `F11` / `Ctrl/Cmd+Q` handled in the window instead of `globalShortcut`; no opener plugin (the mock opens no external links) | OS-wide shortcuts would hijack F11 in other apps; no unused dependency |
 | D13 | Product renamed **LGA Study Visa Explorer** (`com.lgavisa.studyvisaexplorer`) | business naming; nothing had shipped under the old identifier |
+| D14 | Course summaries are filed under the university's country, not the course record's own `country` | the reference hid ~16 summaries whose course and university countries differ |
+| D15 | No first-run copy of the snapshot to disk: no `current.json` ⇒ read the snapshot inside the app. Its `sourceGeneratedAt` is the reference build date, so the first online launch refreshes the catalogue once | saves ~9 MB of writes; that first refresh also re-filters intakes to today |
 
 ## 13. Traceability
 

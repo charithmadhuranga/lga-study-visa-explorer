@@ -2,46 +2,31 @@
 //! belongs in the webview. Multi-MB data never crosses this bridge — the UI reads bundle
 //! files through the asset protocol instead (SPEC §7.2).
 
+use std::sync::Arc;
+
 use serde::Serialize;
 use tauri::{AppHandle, State};
 
+use crate::catalogue::{ActiveBundle, Service, Status};
 use crate::window::LaunchMode;
 
-/// Bundle provenance handed to the UI for the status popover and page footnotes (FR-21).
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ActiveBundle {
-    /// Absolute root of the active bundle, for `convertFileSrc()`
-    pub root: String,
-    pub meta: BundleMeta,
-    /// 'bundled' | 'updates/vN'
-    pub source: String,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BundleMeta {
-    pub schema_version: u32,
-    pub built: String,
-    pub source_generated_at: String,
-    pub fx_date: String,
-    pub fx: serde_json::Map<String, serde_json::Value>,
-}
-
-/// Which bundle the UI should read. `None` means "use the bundled snapshot shipped in
-/// `dist/data`" — the first-run state, and the fallback whenever anything is wrong.
-///
-/// M6 (PLAN) replaces the body with the committed `current.json` pointer; the signature
-/// stays identical so the frontend never changes.
+/// Which bundle the UI should read. `None` means "use the snapshot shipped inside the app" —
+/// the first-run state, and the fallback whenever the store is missing or damaged (SPEC §7.2).
 #[tauri::command]
-pub fn catalogue_active() -> Option<ActiveBundle> {
-    None
+pub fn catalogue_active(service: State<'_, Arc<Service>>) -> Option<ActiveBundle> {
+    service.active()
 }
 
-/// Status-chip state for boot, before any check has run (FR-20).
+/// Status-chip state (FR-20).
 #[tauri::command]
-pub fn catalogue_status() -> serde_json::Value {
-    serde_json::json!({ "state": "bundled" })
+pub fn catalogue_status(service: State<'_, Arc<Service>>) -> Status {
+    service.status()
+}
+
+/// "Check for updates" (FR-20): wakes the background scheduler; never blocks the UI.
+#[tauri::command]
+pub fn catalogue_check(service: State<'_, Arc<Service>>) {
+    service.check_now();
 }
 
 /// Launch facts the UI needs: kiosk mode makes F11 inert (FR-14).

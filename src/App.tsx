@@ -11,6 +11,7 @@ import { useGlobalKeys } from './hooks/useGlobalKeys';
 import { useIdleTimer } from './hooks/useIdleTimer';
 import { useCatalogue } from './store/catalogue';
 import { useAppearance } from './store/appearance';
+import { useUpdates } from './store/updates';
 import { pageVariants } from './animation/variants';
 import { useMotionEnabled } from './animation/useMotionEnabled';
 
@@ -24,11 +25,13 @@ export default function App(): React.JSX.Element {
   const index = useCatalogue((s) => s.index);
   const error = useCatalogue((s) => s.error);
   const initAppearance = useAppearance((s) => s.init);
+  const initUpdates = useUpdates((s) => s.init);
 
   useEffect(() => {
     void initAppearance();
-    void loadCatalogue();
-  }, [initAppearance, loadCatalogue]);
+    // The catalogue renders first; the updater listener attaches afterwards (SPEC §8.1).
+    void loadCatalogue().then(() => initUpdates());
+  }, [initAppearance, loadCatalogue, initUpdates]);
 
   const isWelcome = location.pathname === '/' || location.pathname === '/welcome';
 

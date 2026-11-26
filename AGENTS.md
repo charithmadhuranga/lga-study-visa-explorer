@@ -45,9 +45,9 @@ src/
   styles/            tokens.css  base.css  components.css (design-system classes, one section per component)
   screens/           Welcome Destinations Country University Course CourseFinder Services Journey Shortlist RouteError
   components/        TopBar PageHeader Segmented Breadcrumbs FilterRail UniversityCard CourseRow LogoBadge
-                     Icon SourceNote ContactLine EmptyState Pager RichText Toast IdleDialog (StatusPopover in M6)
+                     Icon SourceNote ContactLine EmptyState Pager RichText Toast IdleDialog StatusPopover
   data/              types.ts  content.ts  chapters.ts  images.ts  catalogue.ts (loaders)  selectors.ts  filters.ts  format.ts  photos.ts
-  store/             session.ts  filters.ts  catalogue.ts  appearance.ts
+  store/             session.ts  filters.ts  catalogue.ts  appearance.ts  updates.ts (catalogue updater status + hot-swap)
   hooks/             useGlobalKeys.ts (Esc/Home/PageUp/PageDown/F11/Ctrl+Q)  useIdleTimer.ts
   shell/             window.ts (fullscreen, quit, kiosk info — the only code that talks to window APIs)
   animation/         variants.ts  usePageTransition.ts  useCountUp.ts  useMotionEnabled.ts
@@ -55,7 +55,9 @@ src/
 src-tauri/src/
   main.rs  lib.rs
   window.rs          fullscreen / kiosk / shortcuts
-  catalogue/         mod.rs store.rs fetch.rs transform.rs sanitize.rs
+  catalogue/         mod.rs (service, scheduler, events) model.rs store.rs fetch.rs transform.rs sanitize.rs updater.rs
+src-tauri/tests/
+  upstream_parity.rs   Rust transform vs bundled snapshot (LGA_UPSTREAM_DIR) + opt-in live network tests
   commands.rs        catalogue_*, updater_*, clipboard, open_external
   updater.rs         app self-update glue
 scripts/
@@ -106,6 +108,8 @@ cargo fmt --manifest-path src-tauri/Cargo.toml --check
 npm run data:import        # reference/data/*.js → src/assets/data/*.json (+ copies images)
 npm run data:parity        # asserts counts/golden records against reference/data
 LGA_UPSTREAM_DIR=/path/to/visa-website npm run data:parity:upstream   # full Rust transform parity (optional)
+cargo test --manifest-path src-tauri/Cargo.toml --test upstream_parity -- --ignored live_   # live network checks
+LGA_CATALOGUE_SOURCE=/path/to/processed npm run tauri dev   # run the updater against local data (Gate G6)
 ```
 
 `reference/README.md` documents the *old* Electron workflow (`npm start`, `npm run kiosk`,

@@ -13,8 +13,11 @@ export interface CatalogueStore {
   active: ActiveBundle | null;
   error: string | null;
   load: () => Promise<void>;
-  /** Called by the update listener: re-read the bundle and swap the index atomically */
-  reload: () => Promise<void>;
+  /**
+   * Called by the update listener: re-read the bundle and swap the index atomically.
+   * Resolves `false` (and keeps the current data on screen) if the new bundle cannot load.
+   */
+  reload: () => Promise<boolean>;
 }
 
 export const useCatalogue = create<CatalogueStore>((set) => ({
@@ -35,9 +38,16 @@ export const useCatalogue = create<CatalogueStore>((set) => ({
 
   reload: async () => {
     resetCatalogueCache();
-    await loadCatalogue();
-    const active = await loadActiveBundle();
-    const catalogue = await loadCatalogue();
-    set({ index: buildIndex(catalogue), active, error: null });
+    try {
+      const catalogue = await loadCatalogue();
+      const active = await loadActiveBundle();
+      set({ index: buildIndex(catalogue), active, error: null });
+      return true;
+    } catch (err) {
+      // Never trade a working catalogue for a broken one mid-consultation (NFR-12).
+      console.warn('Updated catalogue could not be loaded; keeping the current one', err);
+      resetCatalogueCache();
+      return false;
+    }
   },
 }));

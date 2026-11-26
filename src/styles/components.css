@@ -1903,6 +1903,121 @@ select {
 }
 
 /* =====================================================================
+   Catalogue status chip + popover (FR-20)
+   ===================================================================== */
+.status {
+  position: relative;
+}
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  min-height: 44px;
+  max-width: 19rem;
+  padding: 0.4rem 1rem 0.4rem 0.85rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--on-navy-glass-line);
+  background: var(--on-navy-glass);
+  color: var(--on-navy-lead);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status-chip:hover {
+  border-color: var(--gold);
+  color: var(--white);
+}
+.status-chip__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-chip__dot {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+.status-chip__dot--ok {
+  background: var(--ok);
+}
+.status-chip__dot--warn {
+  background: var(--gold);
+}
+.status-chip__dot--error {
+  background: var(--danger);
+}
+/* Pulses only while a check is running — it stops by itself when the state changes. */
+.status-chip__dot--busy {
+  background: var(--gold2);
+  animation: lga-pulse 1.6s ease-in-out infinite;
+}
+@keyframes lga-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+.status-pop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.6rem);
+  z-index: 40;
+  width: 22rem;
+  display: grid;
+  gap: var(--s-4);
+  padding: 1.3rem 1.4rem;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--e3);
+}
+.status-pop .eyebrow {
+  margin-bottom: 0;
+}
+.status-pop__facts {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+.status-pop__facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.86rem;
+}
+.status-pop__facts dt {
+  color: var(--mute);
+}
+.status-pop__facts dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+.status-pop__note {
+  display: flex;
+  gap: 0.5em;
+  font-size: 0.82rem;
+  color: var(--ink2);
+}
+.status-pop__note svg {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  color: var(--goldInk);
+}
+.status-pop__appearance {
+  display: grid;
+  gap: 0.4rem;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+/* =====================================================================
    Responsive — primary target ≥ 1200 px; smaller widths stay usable (DESIGN §4)
    ===================================================================== */
 @media (max-width: 1400px) {
@@ -1911,6 +2026,9 @@ select {
   }
 }
 @media (max-width: 1200px) {
+  .status-chip__label {
+    display: none;
+  }
   .dest-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

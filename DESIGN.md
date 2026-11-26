@@ -80,6 +80,8 @@ Three surface layers: **page → card → raised**.
 | `--on-navy-glass-line` | white @ 14 % | glass tile border |
 | `--backdrop` | `rgba(3,10,24,.78)` | idle dialog backdrop |
 | `--scrim-hero` / `--scrim-band` / `--scrim-bottom` | navy gradients | text over photography — **always** |
+| `--ok` | `#5CC98A` | status-chip dot only: up to date / updated |
+| `--danger` | `#E8796F` | status-chip dot only: update failed |
 
 ### 2.4 Contrast (WCAG)
 
@@ -200,7 +202,7 @@ component, classes prefixed by the component).
 | `Toast` | enter/leave | navy pill, gold border, check icon, `aria-live` wrapper |
 | `IdleDialog` | countdown | blurred backdrop, eyebrow, big ringed countdown, focus trapped |
 | `RouteError` (screen) | — | branded failure inside the shell |
-| `StatusPopover` *(M6)* | `idle/checking/up-to-date/available/updated/offline/failed` | top bar chip |
+| `StatusPopover` | chip: `ok` / `busy` (pulsing dot while a check runs) / `warn` (offline) / `error` | glass chip in the top bar (label hides < 1200 px); popover: catalogue + source dates, counts, FX month, retry note, **Check for updates**, Auto/Light/Dark `Segmented` |
 | `UpdateBanner` *(M7)* | dismissible | "Version x ready — Restart to apply" |
 
 ---

@@ -17,9 +17,9 @@ documentation. Milestones are sequential gates; tasks inside a milestone may ove
 | M2 Data foundation | ✅ | parity, filters, formatting, RichText tests green |
 | M3 Screen parity | ✅ (sign-off pending) | all nine routes + idle reset + keys; sign-off now against DESIGN v2 |
 | M4 Presentation redesign & motion | ✅ (audit pending) | axe audit + frame-chart pass still to do |
-| M5 Desktop shell | 🟡 | code done; CSP finalisation with M6, kiosk run-through on the office screen |
-| M6 Catalogue updater | ☐ next | |
-| M7 App self-update | ☐ | |
+| M5 Desktop shell | ✅ (gate ⏳) | CSP finalised; kiosk run-through on the office screen pending |
+| M6 Catalogue updater | ✅ (6.8 + gate ⏳) | Rust updater, exact upstream parity, status chip, hot-swap |
+| M7 App self-update | ☐ next | release feed can live on the public GitHub repo |
 | M8 Packaging & QA | ☐ | |
 
 Legend: ✅ done · 🟡 in progress · ☐ not started · ⏳ needs a manual check on real hardware.
@@ -145,7 +145,7 @@ screen; `DESIGN` §7.3 no longer lists it).
 | 5.2 | F11 / Ctrl-Cmd+Q / PageUp / PageDown handled in the webview + `shell_info`, `app_quit` commands (replaces `tauri-plugin-global-shortcut`, SPEC D12) | ✅ |
 | 5.3 | External links — none exist in the product; `tauri-plugin-opener` not needed (SPEC D12) | ✅ n/a |
 | 5.4 | Clipboard write for “Copy summary” via `tauri-plugin-clipboard-manager` + capability | ✅ |
-| 5.5 | CSP finalisation (`connect-src` limited to the two raw hosts + release host) | ☐ with M6.2 |
+| 5.5 | CSP finalisation: all network I/O is in Rust, so `connect-src` allows no external host | ✅ |
 | 5.6 | Icons, app metadata, identifiers, product name, version `2.0.0` | ✅ (final LGA icon artwork ⏳) |
 | 5.7 | Window close/quit behaviour: closing the window quits (mock parity) | ✅ |
 
@@ -154,24 +154,28 @@ violations = 0 in the console. — ⏳
 
 ---
 
-## M6 — Catalogue updater (≈4 d)
+## M6 — Catalogue updater (≈4 d)  ✅ (logo cache + in-app gate ⏳)
 
-| # | Task | Depends | Notes |
-|---|---|---|---|
-| 6.1 | `catalogue/store.rs`: bundle layout, `current.json` atomic pointer, prune, rollback | 2.2 | `SPEC` §7.2 |
-| 6.2 | `catalogue/fetch.rs`: fingerprint → staged download → progress events → validation | 6.1 | FR-19 |
-| 6.3 | `catalogue/transform.rs` (Rust port of `tools/build_data.py`, minus image work) + `LOCFIX` | 6.1 | `SPEC` §8.3 |
-| 6.4 | `catalogue/sanitize.rs` allowlist + unit tests (XSS fixtures) | 6.3 | FR-26 |
-| 6.5 | Scheduler: launch + 6 h + on-demand + backoff; failure/toast states | 6.2 | FR-19/20 |
-| 6.6 | Frontend hot-swap: store update + toast + footnote refresh, no restart | 6.5 | FR-21 |
-| 6.7 | Status chip + popover (states, counts, **Check for updates**) | 6.5 | FR-20 |
-| 6.8 | Logo disk cache (LRU 50 MB) served through the asset protocol | 6.1 | FR-22 |
-| 6.9 | Parity tests: Rust transform vs reference counts/golden records (`LGA_UPSTREAM_DIR` gated) | 6.3 | |
-| 6.10 | Failure-injection tests: kill mid-download, corrupt JSON, offline, stale fingerprint | 6.2 | NFR-12 |
+| # | Task | Status |
+|---|---|---|
+| 6.1 | `catalogue/store.rs`: `updates/vN`, atomic `current.json`, prune (keep 2), dangling/corrupt pointer → snapshot | ✅ + tests |
+| 6.2 | `catalogue/fetch.rs`: HTTP (rustls, OS certs) or local dir source; streamed download, progress, SHA-256 | ✅ + live test |
+| 6.3 | `catalogue/transform.rs`: port of `build_data.py` (+ `LOCFIX`, rules 1–11) | ✅ + tests |
+| 6.4 | `catalogue/sanitize.rs` allowlist + XSS fixtures | ✅ + tests |
+| 6.5 | Scheduler: 8 s after launch, 6 h, on demand, backoff 1/5/15/60 min; status events | ✅ |
+| 6.6 | Frontend hot-swap: `store/updates.ts` → `reload()` (keeps old data on failure) + toast | ✅ |
+| 6.7 | Status chip + popover (`StatusPopover`): states, provenance, Check for updates, Auto/Light/Dark | ✅ + tests |
+| 6.8 | Logo disk cache (LRU 50 MB) served through the asset protocol | ☐ next |
+| 6.9 | Upstream parity: Rust transform reproduces the bundled snapshot record for record (`npm run data:parity:upstream`) | ✅ 436 / 4,225 / 4,202 identical |
+| 6.10 | Failure injection: crash before pointer swap, corrupt JSON, missing file, offline, stale data behind a new summary, suspiciously small catalogue | ✅ tests |
 
-**Gate G6:** with a synthetic `summary.json` change the app downloads, swaps and re-renders with
-no restart; killing the app mid-update leaves a working bundle; airplane mode shows the correct
-status chip.
+Live checks run 2026-11-26: HTTPS summary fetch ✅; full live update into a temp store (4,225
+courses, progress to 100 %, 3.5 s) ✅.
+
+**Gate G6:** with a synthetic `summary.json` change (`LGA_CATALOGUE_SOURCE=<dir>`) the app
+downloads, swaps and re-renders with no restart; killing the app mid-update leaves a working
+bundle; airplane mode shows the correct status chip. — *covered by unit/integration tests;
+⏳ run once in the desktop app.*
 
 ---
 
@@ -234,7 +238,8 @@ M4 (motion) and M5 (shell) can run in parallel after M3. M6 depends on M2 (data 
 | `html-react-parser` | `RichText` allowlist rendering | `SPEC` FR-26 |
 | `@fontsource/montserrat`, `@fontsource/inter` | offline fonts | `DESIGN` §3 |
 | `vite`, `typescript`, `vitest`, `@testing-library/react`, `eslint`, `prettier` | toolchain | `AGENTS` §4 |
-| Rust: `serde`, `serde_json`, `tokio`, `reqwest`(rustls), `sha2`, `walkdir`, `thiserror`, `tracing`, `chrono` | updater core | `SPEC` §8 |
+| Rust: `serde`, `serde_json`, `tokio` (time, sync, fs, io-util), `reqwest` 0.13 (`rustls`, `gzip`), `sha2`, `thiserror`, `tracing`, `tracing-subscriber` (fmt), `chrono` (clock) | updater core | `SPEC` §8 |
+| Rust dev: `tempfile` | store/updater tests | `AGENTS` §5 |
 
 No other runtime dependencies may be introduced without updating this table.
 

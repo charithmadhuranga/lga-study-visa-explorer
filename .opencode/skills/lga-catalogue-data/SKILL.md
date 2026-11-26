@@ -68,7 +68,8 @@ Key points that bite:
 | 7 | Tags: `scholarship=1, coop=2, pathway=4` (sum into the bitmask) | `TAGBITS` |
 | 8 | Levels fixed `["Bachelor's","Master's","MBA"]`; fields = sorted distinct with `Other` last | 44–45 |
 | 9 | HTML allowlist sanitisation (below) | `San` class |
-| 10 | **No image processing** — runtime never touches Pillow/photos; bundled `img/uni/*` + remote `logoUrl` cover imagery | divergence, `SPEC` §8.3 |
+| 10 | **No image processing** — the updater keeps `photo` for the ids that have one in the embedded snapshot (read via the asset resolver); remote `logoUrl` covers the rest | divergence, `SPEC` §8.3 |
+| 11 | Course `country`/`currency` follow the university; summaries filed under that country | `SPEC` D14 (fixes ~16 hidden summaries) |
 
 The transform must be **deterministic**: same input → identical output (this is what makes parity
 tests meaningful). Use a fixed `today` parameter in tests rather than `Utc::now()`.
@@ -104,13 +105,23 @@ triggers: launch(after UI ready) · every 6 h · on-demand command · backoff af
 any failure ──► delete staging, keep current bundle, emit catalogue://failed { reason }
 ```
 
+Implementation map: `catalogue/model.rs` (schema v2 structs, numbers written like
+`JSON.stringify`), `transform.rs`, `sanitize.rs`, `fetch.rs` (`Source::Http` | `Source::Dir`,
+`LGA_CATALOGUE_SOURCE` override), `store.rs`, `updater.rs` (`Attempt::run`, Tauri-free and
+unit-tested), `mod.rs` (managed `Service`, scheduler, `catalogue://status|updated|failed` events,
+commands `catalogue_active|status|check`). Frontend: `src/store/updates.ts` + `StatusPopover`.
+
+Extra guards beyond the spec table: a new bundle with < 50 % of the active course count is
+rejected; if the data files still carry the active `generatedAt` (CDN lag behind a new summary)
+nothing is committed — that prevents a download loop.
+
 Hard rules:
 
 - **Never block startup** — the UI boots from `current.json`/bundled snapshot first.
 - **Never leave a half-written bundle referenced** — `current.json` is the only pointer and is
   replaced atomically (NFR-12).
-- Endpoints are constants in `fetch.rs`; only `raw.githubusercontent.com` (plus
-  `objects.githubusercontent.com` for the app updater) are in CSP `connect-src`.
+- Endpoints are constants in `fetch.rs`. All network I/O is in Rust, so the webview CSP
+  `connect-src` contains **no** external host.
 - Do **not** use the GitHub API (60 unauthenticated requests/hour per IP is too low for an office).
 
 ### Status chip states (FR-20)
@@ -124,8 +135,7 @@ test.
 
 ```
 <APP_DATA>/lga-study-visa-explorer/
-  current.json          { schemaVersion, dir: "bundled"|"updates/vN", meta }
-  bundled/              catalogue.json · details/*.json        (first run)
+  current.json          { schemaVersion, dir: "updates/vN", meta }   — absent ⇒ embedded snapshot
   updates/vN/           catalogue.json · details/*.json · meta.json
   staging/<uuid>/       in-progress, never referenced by current.json
   logos/                LRU cache of logoUrl, 50 MB cap (FR-22)
@@ -140,7 +150,8 @@ IPC invoke bridge.
 
 ```bash
 npm run data:parity                # snapshot vs reference/data (counts + golden records) — always run
-LGA_UPSTREAM_DIR=/path/to/visa-website npm run data:parity:upstream   # full Rust transform vs reference — optional, heavy
+LGA_UPSTREAM_DIR=/path/to/visa-website npm run data:parity:upstream   # Rust transform vs bundled snapshot, record for record
+cargo test --manifest-path src-tauri/Cargo.toml --test upstream_parity -- --ignored live_   # live HTTPS + full live update
 ```
 
 Assertions to keep green:

@@ -20,7 +20,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "data:import": "node scripts/import-reference-data.mjs",
-    "data:parity": "node scripts/check-parity.mjs"
+    "data:parity": "node scripts/check-parity.mjs",
+    "data:parity:upstream": "cargo test --manifest-path src-tauri/Cargo.toml --test upstream_parity -- --nocapture"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

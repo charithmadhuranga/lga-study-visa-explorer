@@ -14,6 +14,7 @@ import { spring } from '../animation/variants';
 import { useMotionEnabled } from '../animation/useMotionEnabled';
 import { toggleFullscreen } from '../shell/window';
 import { Icon } from './Icon';
+import { StatusPopover } from './StatusPopover';
 
 export function TopBar(): React.JSX.Element {
   const count = useSession((s) => s.shortlist.length);
@@ -76,6 +77,7 @@ export function TopBar(): React.JSX.Element {
       </nav>
 
       <div className="bar-actions">
+        <StatusPopover />
         <button
           className="icon-btn"
           onClick={() => setMode(isLight ? 'dark' : 'light')}

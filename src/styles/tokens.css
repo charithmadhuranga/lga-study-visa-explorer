@@ -65,6 +65,10 @@
   --on-navy-glass-line: rgba(255, 255, 255, 0.14);
   --backdrop: rgba(3, 10, 24, 0.78);
 
+  /* ---- Status (catalogue chip only) ---- */
+  --ok: #5cc98a;
+  --danger: #e8796f;
+
   /* ---- Scrims (navy over photography) ---- */
   --scrim-hero: linear-gradient(
     90deg,

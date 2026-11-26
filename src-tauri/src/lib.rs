@@ -2,12 +2,16 @@
 //!
 //! The webview loads the built frontend; this crate owns window behaviour (fullscreen/kiosk),
 //! the command surface the frontend may call, and plugin wiring. Data updates arrive in M6
-//! (`catalogue` module) and app self-updates in M7 (`updater` module) — both plug in here.
+//! (`catalogue` module, M6) and app self-updates (`updater` module, M7) plug in here.
 
+pub mod catalogue;
 mod commands;
 mod window;
 
 pub fn run() {
+    let _ = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init();
     let mode = window::LaunchMode::from_args(std::env::args());
 
     tauri::Builder::default()
@@ -17,11 +21,14 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::catalogue_active,
             commands::catalogue_status,
+            commands::catalogue_check,
             commands::shell_info,
             commands::app_quit
         ])
         .setup(move |app| {
             window::configure(app.handle(), mode)?;
+            // Starts after a delay on a background task: never blocks startup (SPEC §8.1).
+            catalogue::init(app.handle())?;
             Ok(())
         })
         .build(tauri::generate_context!())
