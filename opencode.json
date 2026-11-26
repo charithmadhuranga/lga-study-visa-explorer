@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "watcher": {
+    "ignore": [
+      "reference/**",
+      "node_modules/**",
+      "dist/**",
+      "src-tauri/target/**",
+      "src/assets/data/**",
+      "src/assets/img/**"
+    ]
+  }
+}

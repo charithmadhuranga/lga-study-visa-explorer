@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LGA Study Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: premium, calm consultancy screen, readable from across the room
+   IDEA: a guided walk from "where" to "which course", like turning pages of a prospectus
+   PICTURE: LGA's own campus and destination photography, full-bleed behind navy
+   COLOUR and TYPE: LGA navy #0B1F3A, white, gold #C9A45C (site brand); Montserrat titles, Inter text
+   LAYOUT: sticky top bar + breadcrumb, filter rail left, large touch cards; stacks under 900px */
+:root{color-scheme:light dark;
+--navy:#0B1F3A;--navy2:#16305A;--gold:#C9A45C;--gold2:#E3C88A;--gold3:#A9813F;
+--bg:light-dark(#F3F4F7,#07152A);--card:light-dark(#FFFFFF,#0F2547);--ink:light-dark(#0B1F3A,#EEF1F6);
+--mute:light-dark(#566079,#9DAAC0);--line:light-dark(#DFE3EA,#1F3A63);--chip:light-dark(#EDF0F5,#16305A);
+--goldInk:light-dark(#86662B,#E3C88A)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{font-size:clamp(15px,calc(9px + .55vw),22px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.55 Inter,system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+h1,h2,h3{font-family:Montserrat,system-ui,sans-serif;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:clamp(1.9rem,3.1vw,2.8rem);line-height:1.08;margin:0 0 .35em;font-weight:800}
+h2{font-size:1.4rem;line-height:1.15;margin:0 0 .6em;font-weight:700}
+h3{font-size:1.08rem;line-height:1.25;margin:0 0 .25em;font-weight:700}
+button,select{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+img{display:block;max-width:100%}
+.wrap{max-width:1760px;margin:0 auto;padding:clamp(18px,2.2vw,40px) max(3vw,16px)}
+.muted{color:var(--mute)}.small{font-size:.82rem}
+.brand{display:inline-flex;align-items:center;gap:.6em;background:none;border:0;padding:0;color:inherit;font-family:Montserrat;text-align:left}
+.brand img{width:2.6em;height:2.6em}
+.brand b{font-weight:800;font-size:1.2em;letter-spacing:.03em;line-height:1}.brand small{display:block;font-weight:500;font-size:.62em;letter-spacing:.14em;color:var(--gold2);margin-top:.25em}
+/* bar */
+#bar{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;display:flex;align-items:center;gap:1rem;padding:.5rem max(3vw,16px);flex-wrap:wrap}
+#bar .brand{margin-right:auto;font-size:.95rem}
+.nav{display:flex;gap:.35rem;flex-wrap:wrap}
+.nav button{background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:.5rem 1rem;min-height:44px;font-weight:600;font-size:.88rem}
+.nav button[aria-current=true]{background:#fff;color:var(--navy);border-color:#fff}
+.nav .sl{border-color:var(--gold)}.nav .sl em{font-style:normal;background:var(--gold);color:var(--navy);border-radius:999px;padding:0 .5em;margin-left:.4em}
+.crumbs{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem;font-size:.9rem}
+.crumbs button{background:none;border:0;color:var(--goldInk);font-weight:600;padding:.4rem 0;min-height:40px}
+.back{background:var(--card)!important;border:1px solid var(--line)!important;border-radius:999px;padding:.45rem 1.1rem!important;color:var(--ink)!important;margin-right:.5rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;border:0;border-radius:999px;padding:.85rem 1.6rem;min-height:48px;font-family:Montserrat;font-weight:700;font-size:1rem;background:linear-gradient(135deg,var(--gold2),var(--gold));color:var(--navy);text-align:center}
+.btn.alt{background:var(--navy);color:#fff}.btn.line{background:transparent;border:2px solid var(--line);color:var(--ink)}
+/* welcome */
+#welcome{min-height:100vh;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:5vh max(5vw,20px) 4vh;
+background:linear-gradient(90deg,rgba(11,31,58,.97) 0%,rgba(11,31,58,.88) 42%,rgba(11,31,58,.3) 100%),url(img/hero.webp) 70% center/cover,var(--navy)}
+#welcome .brand{font-size:clamp(1.1rem,1.7vw,1.7rem)}
+#welcome h1{font-size:clamp(2.3rem,4.4vw,4.4rem);color:#fff;max-width:13em;margin-top:6vh}
+#welcome h1 em{font-style:normal;color:var(--gold2)}
+#welcome .lead{font-size:1.15rem;color:#D2DAE7;max-width:32em;margin:0 0 2.2rem}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,auto));justify-content:start;gap:clamp(1.2rem,3vw,3.4rem);margin-top:4vh;padding-top:1.4rem;border-top:1px solid rgba(255,255,255,.18)}
+.stats b{display:block;font-family:Montserrat;font-weight:800;font-size:clamp(1.6rem,2.5vw,2.6rem);color:var(--gold2);line-height:1}
+.stats span{font-size:.85rem;color:#B8C4D8}
+.contact{font-size:.85rem;color:#9AA9C2;margin:1.2rem 0 0}
+/* cards */
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.grid{display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,19rem),1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0;text-align:left;display:flex;flex-direction:column;overflow:hidden;width:100%;transition:transform .15s,box-shadow .15s}
+button.card:hover{transform:translateY(-3px);box-shadow:0 16px 32px -20px rgba(11,31,58,.5)}
+.card .body{padding:1.1rem 1.2rem 1.2rem;display:flex;flex-direction:column;gap:.45rem;flex:1}
+.ph{aspect-ratio:16/9;width:100%;object-fit:cover;background:var(--navy2)}
+.dgrid{grid-template-columns:repeat(5,minmax(0,1fr))}.dgrid .dest{min-height:clamp(22rem,62vh,44rem)}
+@media(max-width:1200px){.dgrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr))}.dgrid .dest{min-height:20rem}}
+.dest{position:relative;min-height:22rem;color:#fff;border:0;background:var(--navy)}
+.dest img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dest::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,31,58,.05) 25%,rgba(11,31,58,.92) 78%)}
+.dest .body{position:relative;z-index:1;justify-content:flex-end}
+.dest h2{color:#fff;margin:0;font-size:1.7rem}.dest .tag{color:var(--gold2);font-weight:600}.dest .meta{color:#D0D9E7;font-size:.88rem}
+.band{height:2.6rem;background:linear-gradient(120deg,var(--navy),var(--navy2))}
+.uhead{display:flex;gap:.9rem;align-items:center}
+.logo{width:3.4rem;height:3.4rem;border-radius:12px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex:none}
+.logo img{width:88%;height:88%;object-fit:contain}
+.crest{width:100%;height:100%;display:grid;place-items:center;font-family:Montserrat;font-weight:800;color:#fff;font-size:1rem;background:var(--navy)}
+.card .logo{margin-top:-2.6rem;box-shadow:0 6px 16px -8px rgba(0,0,0,.4)}
+.pill{display:inline-block;background:var(--chip);border-radius:999px;padding:.18rem .7rem;font-size:.78rem;font-weight:600;white-space:nowrap}
+.pill.g{background:rgba(201,164,92,.2);color:var(--goldInk)}
+.pills{display:flex;flex-wrap:wrap;gap:.35rem}
+/* country */
+.cband{position:relative;border-radius:22px;overflow:hidden;color:#fff;min-height:14rem;display:flex;align-items:flex-end;padding:2rem clamp(1.2rem,2.5vw,2.4rem);margin-bottom:1.3rem;background:var(--navy)}
+.cband img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cband::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,31,58,.95) 10%,rgba(11,31,58,.45) 75%)}
+.cband>div{position:relative;z-index:1}.cband h1{color:#fff}.cband p{color:#D5DDEA;margin:0;max-width:40em}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:1.4rem}
+.facts div{background:var(--card);padding:1rem 1.2rem}.facts b{display:block;font-family:Montserrat;font-size:1.1rem;line-height:1.25}.facts span{font-size:.78rem;color:var(--mute)}
+.tabs{display:flex;gap:.3rem;margin-bottom:1.3rem;flex-wrap:wrap;border-bottom:2px solid var(--line)}
+.tabs button{background:none;border:0;padding:.7rem 1.1rem;min-height:48px;font-weight:700;font-family:Montserrat;color:var(--mute);border-bottom:3px solid transparent;margin-bottom:-2px}
+.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--gold)}
+.split{display:grid;grid-template-columns:18rem minmax(0,1fr);gap:1.5rem;align-items:start}
+.rail{position:sticky;top:5.2rem;max-height:calc(100vh - 6rem);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.1rem}
+.rail h3{font:600 .8rem Inter;color:var(--mute);margin:1.1rem 0 .5rem}.rail h3:first-child{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.chips button{background:var(--chip);border:1px solid transparent;border-radius:999px;padding:.4rem .8rem;min-height:40px;font-size:.82rem;font-weight:600;text-align:left}
+.chips button i{font-style:normal;color:var(--mute);font-weight:500;margin-left:.3em}
+.chips button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--gold)}.chips button[aria-pressed=true] i{color:var(--gold2)}
+.more{background:none;border:0;color:var(--goldInk);font-weight:700;padding:.5rem 0;font-size:.85rem}
+.search{width:100%;font:inherit;font-size:16px;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:46px}
+input[type=range]{width:100%;accent-color:var(--gold3);min-height:36px}
+.tog{display:flex;align-items:center;gap:.6rem;min-height:40px;font-size:.88rem;font-weight:600;cursor:pointer}.tog input{width:1.2rem;height:1.2rem;accent-color:var(--gold3)}
+.clear{background:none;border:0;color:var(--goldInk);font-weight:700;padding:.6rem 0;margin-top:.5rem}
+.count{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:1rem;flex-wrap:wrap}
+select{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:.55rem 1rem;min-height:44px;font-size:.9rem;font-weight:600}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.95rem 1.2rem;text-align:left;width:100%}
+.row+.row{margin-top:.55rem}.row h3{margin-bottom:.4rem}
+.row .r{text-align:right;white-space:nowrap}.row .r b{font-family:Montserrat;display:block;font-size:1.05rem}
+.empty{padding:3rem 1rem;text-align:center;color:var(--mute);background:var(--card);border:1px dashed var(--line);border-radius:18px}
+.pager{text-align:center;margin-top:1.2rem}
+/* uni & course */
+.uhero{border-radius:22px;overflow:hidden;position:relative;margin-bottom:1.3rem;background:linear-gradient(120deg,var(--navy),var(--navy2));color:#fff;min-height:12rem;display:flex;align-items:flex-end}
+.uhero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.uhero::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(11,31,58,.95) 15%,rgba(11,31,58,.2) 80%)}
+.uhero .in{position:relative;z-index:1;padding:1.6rem clamp(1.2rem,2.4vw,2.2rem);display:flex;gap:1.2rem;align-items:center}
+.uhero h1{color:#fff;margin:0}.uhero .muted{color:#C9D3E3}
+.uhero .logo{width:4.6rem;height:4.6rem;border-radius:16px}
+.two{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:1.4rem;align-items:start}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.3rem 1.4rem}
+.panel+.panel{margin-top:1rem}
+.prose{max-width:62em}.prose p{margin:.2em 0 .8em}.prose h4{font-family:Montserrat;font-size:1rem;margin:1.2em 0 .4em}.prose ul{padding-left:1.2em;margin:.2em 0 .8em}.prose li{margin:.25em 0}
+.clamp{max-height:14em;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,#000 65%,transparent)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11.5rem),1fr));gap:.8rem;margin:1.1rem 0 1.4rem}
+.kv div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.9rem 1rem}
+.kv span{display:block;font-size:.75rem;color:var(--mute)}.kv b{font-family:Montserrat;font-size:1.12rem}.kv em{display:block;font-style:normal;font-size:.75rem;color:var(--mute)}
+ul.tick{list-style:none;padding:0;margin:0}ul.tick li{padding:.5rem 0 .5rem 1.6rem;position:relative;border-bottom:1px solid var(--line)}
+ul.tick li:last-child{border:0}ul.tick li::before{content:"";position:absolute;left:.2rem;top:1rem;width:.5rem;height:.5rem;transform:rotate(45deg);background:var(--gold)}
+.dark{background:linear-gradient(150deg,var(--navy2),var(--navy));color:#fff;border:0}.dark .muted{color:#BAC6DA}
+.big{font-size:1.4rem;font-family:Montserrat;font-weight:700;margin:.25rem 0;line-height:1.2}
+.intk{display:flex;justify-content:space-between;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--line)}.intk:last-child{border:0}
+.stepper{display:flex;justify-content:space-between;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+.stepper .btn{max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+/* services / journey */
+.svc h3{margin-top:.2rem}.dia{width:2.6rem;height:2.6rem;border-radius:12px;background:var(--navy);display:grid;place-items:center;margin-bottom:.5rem}.dia i{width:.8rem;height:.8rem;transform:rotate(45deg);background:var(--gold)}
+.journey{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.8rem;counter-reset:s;margin-bottom:2rem}
+.journey div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.1rem}
+.journey div::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--navy);color:var(--gold2);font-family:Montserrat;font-weight:800;margin-bottom:.7rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;background:var(--card)}
+th,td{padding:.85rem 1rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;min-width:14rem}
+th{font-size:.8rem;color:var(--mute);font-weight:600;min-width:9rem;width:9rem}
+#idle{position:fixed;inset:0;background:rgba(5,15,32,.8);display:none;place-items:center;z-index:50;padding:20px}
+#idle .panel{max-width:32rem;text-align:center}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:.8rem 1.4rem;border-radius:999px;border:1px solid var(--gold);opacity:0;transition:opacity .25s;pointer-events:none;z-index:60;font-weight:600}
+.note{font-size:.78rem;color:var(--mute);margin-top:1.8rem}
+.fade{animation:fd .35s ease-out}@keyframes fd{from{opacity:0;transform:translateY(8px)}}
+@media(prefers-reduced-motion:reduce){.fade{animation:none}button.card{transition:none}}
+@media(max-width:1200px){.journey{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.split,.two{grid-template-columns:minmax(0,1fr)}.rail{position:static;max-height:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.nav button{padding:.4rem .7rem;font-size:.8rem}.row{grid-template-columns:minmax(0,1fr)}.row .r{text-align:left}.journey{grid-template-columns:minmax(0,1fr)}.uhero .in{flex-direction:column;align-items:flex-start}.stepper .btn{max-width:100%}}
+</style>
+</head>
+<body>
+<div id="app"><p style="padding:2rem">Loading catalogue…</p></div>
+<div id="idle" role="dialog" aria-modal="true" aria-labelledby="idleT"><div class="panel"><h2 id="idleT">Still with us?</h2><p class="muted">This screen goes back to the welcome page and clears the shortlist in <b id="idleN">20</b> seconds, ready for the next visitor.</p><button class="btn" id="idleKeep">Continue consultation</button></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="data/catalog.js"></script>
+<script>
+{
+/* ===================== LGA content (from lgavisa.com, checked Nov 2026) ===================== */
+const CONTACT='+94 71 722 5223 · admin@lgavisa.com · lgavisa.com · 1st Floor, 464 High Level Road, Nugegoda';
+const CUR={uk:'£',australia:'A$',canada:'C$','new-zealand':'NZ$',usa:'US$'};
+const FXK={uk:'GBP',australia:'AUD',canada:'CAD','new-zealand':'NZD',usa:'USD'};
+const STEM=['Computing & IT','Data & Analytics','Engineering & Construction','Science & Environment'];
+const COUNTRIES=[
+ {id:'uk',name:'United Kingdom',short:'the UK',tag:'World-renowned degrees, including fast-track one-year master’s',
+  facts:[['18 months','Graduate Route for bachelor’s & master’s, applications from 1 Jan 2027 (3 years for PhD)'],['Sep & Jan','Main intakes at most universities'],['20 hrs / week','Work limit during term time'],['1 year','Typical taught master’s']],
+  why:[['1-year master’s degrees','Save a full year of tuition and living costs compared to most other countries.'],['Home of world rankings','Oxford, Cambridge, Imperial and dozens more globally celebrated institutions.'],['Graduate Route','Stay and work after graduating with no job offer needed: 2 years if you apply by 31 Dec 2026, 18 months from 1 Jan 2027 (3 years for PhD).'],['Gateway to Europe','Short flights and rail links make exploring Europe part of student life.']],
+  cities:['London','Manchester','Birmingham','Glasgow','Edinburgh','Sheffield'],
+  visa:['Accept your offer and receive your CAS (Confirmation of Acceptance for Studies)','Hold tuition and living costs for 28 consecutive days before applying','Tuberculosis test and approved English test where required','Apply online, then give biometrics at the visa application centre'],
+  faq:[['What is a CAS?','An electronic reference from your university, issued after you accept your offer, required for the visa application.'],['Can dependants come with me?','Since 2024, generally only students on research postgraduate programmes (PhD) and government-funded courses. We advise based on your course.'],['Is IELTS mandatory?','Many universities accept PTE or other tests, but some routes need a UKVI-approved test. We check your exact requirement.']],
+  src:'GOV.UK: Student visa, Graduate visa'},
+ {id:'australia',name:'Australia',short:'Australia',tag:'Globally ranked education, great lifestyle and up to 3 years of post-study work',
+  facts:[['2–3 years','Post-study work (subclass 485), by qualification'],['Feb & Jul','Major intakes (+ Nov at some universities)'],['48 hrs / fortnight','Work limit during study'],['AUD 2,500','Student visa (500) fee from 1 July 2026']],
+  why:[['7 of the world’s top 100 universities','Group of Eight institutions lead research in medicine, engineering and business.'],['Work while you learn','Up to 48 hours per fortnight during term: income and local experience.'],['Long post-study runway','The Temporary Graduate visa (485) usually gives 2–3 years, depending on your qualification.'],['Safe & multicultural','Large Sri Lankan student communities in Sydney, Melbourne and Adelaide.']],
+  cities:['Sydney','Melbourne','Brisbane','Adelaide','Perth','Gold Coast'],
+  visa:['Accept your offer and receive your Confirmation of Enrolment (CoE)','Prepare Genuine Student answers and financial evidence','Arrange Overseas Student Health Cover (OSHC)','Lodge the Student visa (subclass 500) online in ImmiAccount'],
+  faq:[['Can my spouse or children join me?','Since 2024, dependants are generally limited to students in research master’s and PhD courses. We check the rules for your course.'],['How long does the visa take?','It varies by season, volume and how complete your file is. Home Affairs publishes estimates but never guarantees a date.']],
+  src:'Department of Home Affairs: subclass 500 and 485'},
+ {id:'canada',name:'Canada',short:'Canada',tag:'Quality education, welcoming communities and clear pathways to residency',
+  facts:[['Up to 3 years','Post-Graduation Work Permit (PGWP)'],['Jan · May · Sep','Winter, summer & fall intakes'],['24 hrs / week','Off-campus work during term'],['No PAL needed','Master’s & PhD at public institutions (from 1 Jan 2026)']],
+  why:[['Affordable excellence','Lower tuition and living costs than the US, UK or Australia for comparable quality.'],['PR-friendly policies','Express Entry and PNP streams reward Canadian graduates with residency routes.'],['Co-op & internships','Many programmes include paid co-op placements built into the curriculum.'],['Safe & inclusive','Consistently ranked among the safest, most multicultural countries.']],
+  cities:['Toronto','Vancouver','Montreal','Ottawa','Calgary','Halifax'],
+  visa:['Receive a Letter of Acceptance from a designated learning institution (DLI)','Get a Provincial Attestation Letter (PAL) if your programme needs one','Show proof of funds (often with a GIC)','Apply online and give biometrics'],
+  faq:[['Can I get PR after studying?','Many graduates get a PGWP, then apply through Express Entry or a Provincial Nominee Program. Eligibility depends on your institution and course, so we check before you commit.'],['College or university?','Colleges offer hands-on diplomas; universities offer degrees. Both can lead to a PGWP if you meet current rules.'],['Is SDS still available?','No. The Student Direct Stream was discontinued in November 2024.']],
+  src:'IRCC: study permit, PGWP, 2026 cap notice'},
+ {id:'new-zealand',name:'New Zealand',short:'New Zealand',tag:'Practical, industry-linked education in one of the world’s safest countries',
+  facts:[['Up to 3 years','Post-study work visa, by qualification'],['Feb & Jul','Main intakes at most institutions'],['25 hrs / week','Work during term, full-time in breaks (from 3 Nov 2025)'],['8 universities','All rank among the top 3% worldwide']],
+  why:[['Globally respected system','All eight New Zealand universities rank among the top 3% worldwide.'],['Safety first','Consistently ranked among the world’s most peaceful countries.'],['Skills shortage lists','IT, healthcare, engineering and construction graduates are in demand.'],['Nature at your doorstep','Beaches, mountains and adventure sports within weekend reach.']],
+  cities:['Auckland','Wellington','Christchurch','Hamilton','Dunedin','Palmerston North'],
+  visa:['Receive your Offer of Place','Pay first-year tuition or show evidence of payment','Show funds for living costs','Apply for a Fee Paying Student Visa online'],
+  faq:[['Are scholarships available?','Yes. Universities offer merit-based tuition discounts and some government scholarships. We match you to what you qualify for.'],['Can I work full-time in breaks?','Most tertiary students on a full-time course of one academic year or longer can work full-time during scheduled holidays.'],['Is there a visa interview?','Rarely. Assessment is mostly on paper; complete files rarely face issues.']],
+  src:'Immigration New Zealand: student visas, work rights (Nov 2025)'},
+ {id:'usa',name:'United States',short:'the USA',tag:'World-leading universities, research opportunities and flexible career paths',
+  facts:[['12 + 24 months','OPT work, plus 24 months for STEM degrees'],['Aug & Jan','Fall & spring intakes'],['20 hrs / week','On-campus work during term'],['F-1','Student visa, interview in Colombo']],
+  why:[['Top-ranked institutions','Home to many of the world’s highest-ranked universities.'],['Flexible academics','Combine majors, switch paths and choose from thousands of electives.'],['Funding & assistantships','Graduate students can access TA/RA positions covering tuition plus a stipend.'],['Career powerhouse','Internships (CPT) and OPT open doors to leading employers.']],
+  cities:['Boston','New York','Chicago','San Francisco','Austin','Seattle'],
+  visa:['Receive your I-20 from the university','Pay the SEVIS fee and complete the DS-160','Attend the F-1 interview at the US Embassy in Colombo','Show funding for at least the first year'],
+  faq:[['How hard is the F-1 interview?','A 2–5 minute conversation about your study plans, funding and intent to return home. Our mock interviews prepare you for it.'],['Can I get scholarships?','Merit awards at private universities and graduate assistantships can cut costs a lot. We find realistic options in your shortlist.'],['Community college first?','A budget route: 2 years at a community college, then transfer into a university’s third year.']],
+  src:'U.S. Department of State, Study in the States'}];
+const SERVICES=[['University admissions',['Course and university shortlisting','Applications and offer-letter follow-up','Statements of purpose & Genuine Student guidance']],['Student visas',['One-on-one visa consultations','Financial documents and interview preparation','Refusal reviews, appeals and pre-departure support']],['IELTS & PTE classes',['In-house classes in Nugegoda and online','Exam-style practice with feedback','Mock tests to reach your target score']]];
+const WHY=[['Visa refusal specialists','Refused before? We review the refusal letter line by line and rebuild a stronger application.'],['In-house IELTS & PTE','Our own classes in Nugegoda and online, with exam-style practice and mock tests.'],['400+ institutions','Compare bachelor’s, master’s and MBA courses across five destinations.'],['Transparent from day one','A free first consultation, and every charge quoted in writing before you commit.']];
+const STEPS=[['Free consultation','Ambitions, budget and timelines, with an honest feasibility read.'],['Shortlist & apply','Polished applications to your best-fit universities.'],['Receive offer','We follow up until you hold an offer letter.'],['Financials & visa file','Tuition payment, funds arrangement and visa lodgement.'],['Interview & decision','Mock interviews where required.'],['Fly with confidence','Pre-departure briefing and support while you study.']];
+const DOCS=[['Academic documents',['O/L & A/L certificates (or degree transcripts)','English test score (IELTS / PTE / TOEFL)','Passport valid beyond the course end date','CV / work experience letters','Statement of purpose (we refine it)','Two reference letters']],['Financial documents',['Bank statements / fixed deposits (typically a 28-day history)','Sponsor letter & income proof','Education loan approval (if applicable)','GIC / tuition payment receipts (Canada)','Property / asset valuations (supporting)','CA statement summarising funds']]];
+function psw(c,lvl,fld){
+ if(c==='uk')return['Graduate Route: 18 months','For applications from 1 Jan 2027. Apply by 31 Dec 2026 for 2 years.'];
+ if(c==='australia')return['485 visa: up to 2 years','Bachelor’s and coursework master’s. Research degrees can receive longer.'];
+ if(c==='canada')return lvl===0?['PGWP: up to 3 years','Length follows programme length. Degree programmes are eligible in any field.']:['PGWP: up to 3 years','Master’s graduates of eligible programmes can receive 3 years.'];
+ if(c==='new-zealand')return['Post-study work visa: up to 3 years','For bachelor’s and master’s qualifications studied in New Zealand.'];
+ return STEM.includes(fld)?['OPT: 12 months + 24 for STEM','The 24-month extension applies if the programme is STEM-designated.']:['OPT: 12 months','Practical training after graduation on your F-1 visa.']}
+
+/* ===================== catalogue ===================== */
+const D=window.LGA_CATALOG,app=document.getElementById('app');
+if(!D){app.innerHTML='<p style="padding:2rem">The catalogue file (data/catalog.js) could not be loaded.</p>';throw new Error('no catalog')}
+const LV=D.levels,FD=D.fields,U=D.unis;
+U.forEach((u,i)=>{u.i=i;u.ks=[]});
+const K=D.courses.map(a=>{const k={key:a[0],name:a[1],u:a[2],lvl:a[3],fld:FD[a[4]],fee:a[5],app:a[6],m0:a[7],m1:a[8],ins:a[9],tags:a[10],city:a[11],prov:a[12]};k.c=U[k.u].c;U[k.u].ks.push(k);return k});
+const KM=Object.fromEntries(K.map(k=>[k.key,k])),UM=Object.fromEntries(U.map(u=>[u.id,u])),CM=Object.fromEntries(COUNTRIES.map(c=>[c.id,c]));
+U.forEach(u=>{const f=u.ks.map(k=>k.fee).filter(Boolean);u.from=f.length?Math.min(...f):0});
+/* ===================== helpers ===================== */
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const money=(c,v)=>v?CUR[c]+fmt(v):'On request';
+const usd=(c,v)=>v*(D.fx[FXK[c]]||1);
+const mo=m=>!m?'':m%12===0?(m/12===1?'1 year':m/12+' years'):m+' months';
+const dur=k=>!k.m0?'To be confirmed':k.m0===k.m1?mo(k.m0):mo(k.m0)+' – '+mo(k.m1);
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ym=s=>MN[+s.slice(5,7)-1]+' '+s.slice(0,4);
+const dt=s=>+s.slice(8,10)+' '+ym(s);
+const initials=n=>n.replace(/\(.*?\)/g,'').replace(/\b(of|the|and|at|in|for)\b/gi,'').split(/[\s,–-]+/).filter(w=>/^[A-Z]/.test(w)).map(w=>w[0]).join('').slice(0,3)||n[0];
+const logo=u=>`<div class="logo">${u.logo?`<img src="${esc(u.logo)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'crest',textContent:'${esc(initials(u.name||u.n)).replace(/'/g,'')}'}))">`:`<div class="crest">${esc(initials(u.n))}</div>`}</div>`;
+const lvName=i=>LV[i];
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,2000)}
+let shortlist=[];try{shortlist=JSON.parse(sessionStorage.getItem('lga-sl')||'[]').filter(k=>KM[k])}catch(e){}
+const saveSL=()=>{try{sessionStorage.setItem('lga-sl',JSON.stringify(shortlist))}catch(e){}};
+const F={},tab={};
+const filt=s=>F[s]||(F[s]={q:'',prov:new Set,lvl:new Set,fld:new Set,co:new Set,mon:new Set,max:0,sch:false,coop:false,sort:'feat',show:24,provAll:false});
+const go=h=>{location.hash=h};
+/* detail files load per country, on demand */
+const loading={};
+function detail(c,cb){const L=window.LGA_DETAIL;if(L&&L[c])return cb(L[c]);(loading[c]=loading[c]||[]).push(cb);if(loading[c].length>1)return;
+ const s=document.createElement('script');s.src='data/detail-'+c+'.js';
+ s.onload=()=>{const d=(window.LGA_DETAIL||{})[c]||{u:{},k:{}};loading[c].forEach(f=>f(d));delete loading[c]};
+ s.onerror=()=>{loading[c].forEach(f=>f({u:{},k:{}}));delete loading[c]};document.head.appendChild(s)}
+
+/* ===================== chrome ===================== */
+function bar(active){
+ const n=[['destinations','Destinations'],['finder','Course finder'],['services','Our services'],['journey','Your journey']];
+ return `<header id="bar"><button class="brand" data-go="welcome" aria-label="LGA Visa, welcome screen"><img src="img/logo.png" alt=""><span><b>LGA VISA</b><small>LANKA GLOBAL ACCESS</small></span></button>
+ <nav class="nav">${n.map(([h,t])=>`<button data-go="${h}" aria-current="${active===h}">${t}</button>`).join('')}
+ <button class="sl" data-go="shortlist" aria-current="${active==='shortlist'}">Shortlist<em>${shortlist.length}</em></button><button data-act="fs">Full screen</button></nav></header>`}
+function crumbs(list){return `<div class="crumbs"><button class="back" data-act="back">← Back</button>${list.map((c,i)=>i<list.length-1?`<button data-go="${c[1]}">${esc(c[0])}</button><span class="muted">›</span>`:`<span class="muted">${esc(c[0])}</span>`).join('')}</div>`}
+function page(active,inner){app.innerHTML=bar(active)+`<main class="wrap fade">${inner}</main>`;scrollTo(0,0)}
+
+/* ===================== welcome ===================== */
+function vWelcome(){
+ app.innerHTML=`<section id="welcome"><div><button class="brand" data-go="destinations"><img src="img/logo.png" alt=""><span><b>LGA VISA</b><small>LANKA GLOBAL ACCESS</small></span></button>
+ <h1>Study abroad with Sri Lanka’s <em>student visa specialists</em></h1>
+ <p class="lead">From choosing the right course to your visa approval, explore universities in Australia, Canada, the UK, New Zealand and the USA with your LGA counsellor.</p>
+ <button class="btn" data-go="destinations" style="font-size:1.2rem;padding:1.1rem 2.6rem">Get started →</button></div>
+ <div><div class="stats"><div><b>${U.length}</b><span>universities & colleges</span></div><div><b>${fmt(K.length)}</b><span>courses to compare</span></div><div><b>5</b><span>study destinations</span></div><div><b>Free</b><span>first consultation</span></div></div>
+ <p class="contact">${CONTACT}</p></div></section>`}
+
+/* ===================== destinations ===================== */
+function vDest(){
+ page('destinations',`<div class="hero"><div><h1>Where would you like to study?</h1><p class="muted" style="margin:0">Choose a destination to see its universities, courses, visa and work rules.</p></div><button class="btn line" data-go="finder">Search all courses</button></div>
+ <div class="grid dgrid">${COUNTRIES.map(c=>{const us=U.filter(u=>u.c===c.id),n=K.filter(k=>k.c===c.id).length;return `<button class="card dest" data-go="c-${c.id}"><img src="img/dest-${c.id}.webp" alt="">
+ <div class="body"><h2>${c.name}</h2><div class="tag">${c.facts[0][0]} post-study work</div><div class="meta">${us.length} institutions · ${fmt(n)} courses</div></div></button>`}).join('')}</div>`)}
+
+/* ===================== filters ===================== */
+function chipRow(s,key,opts,limit){const f=filt(s),set=f[key];let list=opts;const many=limit&&opts.length>limit&&!f.provAll;if(many)list=opts.filter((o,i)=>i<limit||set.has(o[0]));
+ return `<div class="chips">${list.map(([v,t,n])=>`<button data-f="${esc(s)}|${key}|${esc(v)}" aria-pressed="${set.has(v)}">${esc(t)}${n!=null?`<i>${n}</i>`:''}</button>`).join('')}</div>${many?`<button class="more" data-more="${esc(s)}">Show all ${opts.length}</button>`:''}`}
+function rail(s,cfg){const f=filt(s);let h=`<aside class="rail" aria-label="Filters"><h3>Search</h3><input class="search" id="q" data-scope="${esc(s)}" placeholder="${cfg.ph||'Course, university or city'}" value="${esc(f.q)}" autocomplete="off">`;
+ cfg.groups.forEach(g=>{if(g.opts.length>1)h+=`<h3>${g.t}</h3>`+chipRow(s,g.k,g.opts,g.limit)});
+ if(cfg.budget){const b=cfg.budget,v=f.max||b.max;h+=`<h3>Max tuition per year</h3><div style="font-family:Montserrat;font-weight:700" id="bv">${f.max?b.cur+fmt(v):'Any budget'}</div><input type="range" id="budget" data-scope="${esc(s)}" data-cur="${b.cur}" min="${b.step}" max="${b.max}" step="${b.step}" value="${v}" aria-label="Maximum tuition per year">`}
+ if(cfg.extras)h+=`<h3>Extras</h3><label class="tog"><input type="checkbox" data-x="${esc(s)}|sch" ${f.sch?'checked':''}>Scholarships available</label><label class="tog"><input type="checkbox" data-x="${esc(s)}|coop" ${f.coop?'checked':''}>Co-op / work placement</label>`;
+ return h+`<button class="clear" data-clear="${esc(s)}">Clear all filters</button></aside>`}
+function match(k,f,s){
+ if(f.lvl.size&&!f.lvl.has(String(k.lvl)))return false;if(f.fld.size&&!f.fld.has(k.fld))return false;
+ if(f.co.size&&!f.co.has(k.c))return false;if(f.prov.size&&!f.prov.has(U[k.u].prov))return false;
+ if(f.mon.size&&!k.ins.some(d=>f.mon.has(d.slice(0,7))))return false;
+ if(f.max){if(!k.fee)return false;if((s==='all'?usd(k.c,k.fee):k.fee)>f.max)return false}
+ if(f.sch&&!(k.tags&1))return false;if(f.coop&&!(k.tags&2))return false;return true}
+const opt={
+ lvl:ks=>LV.map((t,i)=>[String(i),t,ks.filter(k=>k.lvl===i).length]).filter(o=>o[2]),
+ fld:ks=>FD.map(t=>[t,t,ks.filter(k=>k.fld===t).length]).filter(o=>o[2]),
+ mon:ks=>{const m={};ks.forEach(k=>new Set(k.ins.map(d=>d.slice(0,7))).forEach(x=>m[x]=(m[x]||0)+1));return Object.keys(m).sort().slice(0,12).map(x=>[x,ym(x+'-01'),m[x]])},
+ prov:us=>{const m={};us.forEach(u=>u.prov&&(m[u.prov]=(m[u.prov]||0)+1));return Object.entries(m).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).map(([p,n])=>[p,p,n])}};
+const budgetCfg=(ks,cur,toUsd)=>{const fees=ks.map(k=>toUsd?usd(k.c,k.fee):k.fee).filter(Boolean);if(!fees.length)return null;const mx=Math.max(...fees),step=mx>60000?2000:1000;return{cur,max:Math.ceil(mx/step)*step,step}};
+
+/* ===================== country ===================== */
+function vCountry(id){
+ const c=CM[id];if(!c)return vDest();const t=tab[id]||'unis',us=U.filter(u=>u.c===id),ks=K.filter(k=>k.c===id);
+ const tabs=[['unis','Universities & courses'],['why','Why '+c.short],['visa','Visa & work']];let body='';
+ if(t==='unis'){
+  body=`<div class="split">${rail(id,{groups:[{t:'Region / state',k:'prov',opts:opt.prov(us),limit:10},{t:'Study level',k:'lvl',opts:opt.lvl(ks)},{t:'Field of study',k:'fld',opts:opt.fld(ks)},{t:'Upcoming intake',k:'mon',opts:opt.mon(ks)}],budget:budgetCfg(ks,CUR[id]),extras:true})}<section id="results"></section></div>`;
+ }else if(t==='why'){
+  body=`<div class="grid">${c.why.map(([h,d])=>`<div class="card"><div class="body"><div class="dia"><i></i></div><h3>${h}</h3><p class="muted" style="margin:0">${d}</p></div></div>`).join('')}</div>
+  <div class="panel" style="margin-top:1.2rem"><h2>Popular student cities</h2><div class="pills">${c.cities.map(x=>`<span class="pill" style="font-size:.95rem;padding:.4rem 1rem">${x}</span>`).join('')}</div></div>`;
+ }else{
+  body=`<div class="two"><div><div class="panel"><h2>Student visa steps</h2><ul class="tick">${c.visa.map(v=>`<li>${v}</li>`).join('')}</ul></div>
+  <div class="panel"><h2>Common questions</h2>${c.faq.map(([q,a])=>`<h3 style="margin-top:.9rem">${q}</h3><p class="muted" style="margin:.2rem 0 0">${a}</p>`).join('')}</div></div>
+  <div><div class="panel dark"><h3>Work after you graduate</h3><p class="big">${c.facts[0][0]}</p><p class="muted" style="margin:0">${c.facts[0][1]}</p></div>
+  <div class="panel"><h3>Work while studying</h3><p class="big">${c.facts[2][0]}</p><p class="muted" style="margin:0">${c.facts[2][1]}</p></div>
+  <div class="panel"><h3>LGA handles this for you</h3><p class="muted" style="margin:0">Document checklist, financial evidence, statement of purpose and lodgement, reviewed by our visa team before submission. We prepare both applications to the highest standard; only the immigration authority decides the visa.</p></div></div></div>`;
+ }
+ page('destinations',crumbs([['Destinations','destinations'],[c.name]])+`<div class="cband"><img src="img/dest-${id}.webp" alt=""><div><h1>Study in ${c.name}</h1><p>${c.tag}</p></div></div>
+ <div class="facts">${c.facts.map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>
+ <div class="tabs" role="tablist">${tabs.map(([k,v])=>`<button role="tab" aria-selected="${t===k}" data-tab="${id}|${k}">${v}</button>`).join('')}</div>${body}
+ <p class="note">Visa and work rules checked November 2026 (source: ${c.src}). Your LGA counsellor confirms the current rules for your intake.</p>`);
+ if(t==='unis')renderUnis(id)}
+function renderUnis(id){
+ const f=filt(id),box=document.getElementById('results');if(!box)return;const q=f.q.trim().toLowerCase();
+ let rows=U.filter(u=>u.c===id).map(u=>{const um=!q||(u.n+' '+u.city+' '+u.prov).toLowerCase().includes(q);return{u,ks:u.ks.filter(k=>match(k,f,id)&&(um||k.name.toLowerCase().includes(q)))}}).filter(r=>r.ks.length);
+ const so={feat:(a,b)=>b.u.feat-a.u.feat||b.ks.length-a.ks.length,many:(a,b)=>b.ks.length-a.ks.length,fee:(a,b)=>(a.u.from||1e9)-(b.u.from||1e9),az:(a,b)=>a.u.n.localeCompare(b.u.n)};
+ rows.sort(so[f.sort]);const total=rows.reduce((a,r)=>a+r.ks.length,0),shown=rows.slice(0,f.show);
+ box.innerHTML=`<div class="count"><h2 style="margin:0">${rows.length} institution${rows.length===1?'':'s'} <span class="muted" style="font-weight:500;font-size:1rem">· ${fmt(total)} matching courses</span></h2>
+ <select id="sort" data-scope="${id}" aria-label="Sort">${[['feat','Featured first'],['many','Most matching courses'],['fee','Lowest tuition'],['az','A – Z']].map(([v,t])=>`<option value="${v}" ${f.sort===v?'selected':''}>${t}</option>`).join('')}</select></div>`+
+ (rows.length?`<div class="grid">${shown.map(({u,ks})=>{const lv=[...new Set(ks.map(k=>k.lvl))].sort();return `<button class="card" data-go="u-${u.id}">${u.img?`<img class="ph" src="${u.img}" alt="" loading="lazy">`:'<div class="band"></div>'}
+ <div class="body"><div class="uhead">${logo(u)}<div></div></div><h3>${esc(u.n)}</h3><span class="muted small">${esc([u.city,u.prov].filter(Boolean).join(', '))} · ${esc(u.t||u.cat)}</span>
+ <div class="pills" style="margin-top:.3rem">${lv.map(l=>`<span class="pill">${LV[l]}</span>`).join('')}<span class="pill g">${ks.length} course${ks.length>1?'s':''}</span></div>
+ <span class="small" style="margin-top:auto;padding-top:.4rem">${u.from?`Tuition from <b>${money(u.c,u.from)}</b> / year`:'<span class="muted">Tuition on request</span>'}</span></div></button>`}).join('')}</div>
+ ${rows.length>f.show?`<div class="pager"><button class="btn line" data-page="${id}">Show more (${rows.length-f.show} left)</button></div>`:''}`
+ :`<div class="empty"><h3>No institutions match these filters</h3><p>Try removing a region, intake or budget limit.</p></div>`)}
+
+/* ===================== university ===================== */
+function vUni(id){
+ const u=UM[id];if(!u)return vDest();const c=CM[u.c],s='u-'+id,f=filt(s),pf=filt(u.c);
+ if(!f.init){f.init=1;['lvl','fld','mon'].forEach(x=>pf[x].forEach(v=>f[x].add(v)));f.sch=pf.sch;f.coop=pf.coop;f.max=pf.max}
+ const ks=u.ks,camp=u.camp.length?u.camp.join(' · '):u.city;
+ const facts=[[u.t?u.t+' '+u.cat.toLowerCase():u.cat,'Institution type'],[u.f||'—','Founded'],[ks.length+'','Courses in our catalogue'],[u.from?money(u.c,u.from):'On request','Tuition from, per year']];
+ if(u.st)facts[1]=[fmt(u.st),'Students'];
+ page('destinations',crumbs([['Destinations','destinations'],[c.name,'c-'+c.id],[u.n]])+`<div class="uhero">${u.img?`<img src="${u.img}" alt="">`:''}<div class="in">${logo(u)}<div><h1>${esc(u.n)}</h1><div class="muted">${esc([u.city,u.prov,c.name].filter(Boolean).join(', '))}${u.f&&u.st?' · founded '+u.f:''}</div></div></div></div>
+ <div class="facts">${facts.map(([b,t])=>`<div><b>${esc(b)}</b><span>${t}</span></div>`).join('')}</div>
+ <div class="two" style="margin-bottom:1.6rem"><div class="panel"><h2>About</h2><div class="prose clamp" id="about"><p>${esc(u.ab)}</p></div><button class="more" data-act="expand" data-t="about">Read more</button></div>
+ <div><div class="panel"><h3>At a glance</h3><ul class="tick">${camp?`<li>Campuses: ${esc(camp)}</li>`:''}${u.work?'<li>Work while you study</li>':''}${u.coop?'<li>Co-op / work placement programmes</li>':''}${u.house?'<li>On-campus housing available</li>':''}${u.dur.map(d=>`<li>${esc(d)}</li>`).join('')}</ul></div>
+ <div class="panel" id="accP" hidden><h3>Accommodation</h3><div class="prose clamp small" id="acc"></div><button class="more" data-act="expand" data-t="acc">Read more</button></div></div></div>
+ <div class="split">${rail(s,{ph:'Search courses',groups:[{t:'Study level',k:'lvl',opts:opt.lvl(ks)},{t:'Field of study',k:'fld',opts:opt.fld(ks)},{t:'Upcoming intake',k:'mon',opts:opt.mon(ks)}],extras:ks.some(k=>k.tags&3)})}<section id="results"></section></div>`);
+ renderUniCourses(id);
+ detail(u.c,d=>{const x=d.u[id];if(!x||location.hash!=='#u-'+id)return;const a=document.getElementById('about');if(x.a&&a)a.innerHTML=x.a;if(x.h){document.getElementById('acc').innerHTML=x.h;document.getElementById('accP').hidden=false}})}
+function nextIntake(k){return k.ins.length?ym(k.ins[0]):'On request'}
+function courseRow(k,showUni){const u=U[k.u];return `<button class="row" data-go="k-${k.key}"><div><h3>${esc(k.name)}</h3><div class="pills"><span class="pill">${LV[k.lvl]}</span><span class="pill">${esc(k.fld)}</span><span class="pill">${dur(k)}</span>${k.ins.length?`<span class="pill">Next intake ${nextIntake(k)}</span>`:''}${k.tags&1?'<span class="pill g">Scholarships</span>':''}${showUni?`<span class="pill g">${esc(u.n)} · ${CM[k.c].name}</span>`:''}${shortlist.includes(k.key)?'<span class="pill g">✓ Shortlisted</span>':''}</div></div>
+ <div class="r"><b>${money(k.c,k.fee)}</b><span class="muted small">${k.fee?'per year':'tuition'}</span></div></button>`}
+function renderUniCourses(id){
+ const s='u-'+id,f=filt(s),box=document.getElementById('results');if(!box)return;const q=f.q.trim().toLowerCase();
+ const ks=UM[id].ks.filter(k=>match(k,f,s)&&(!q||k.name.toLowerCase().includes(q))).sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name));
+ box.innerHTML=`<div class="count"><h2 style="margin:0">${ks.length} course${ks.length===1?'':'s'}</h2><span class="muted small">Tuition per year as listed by the institution</span></div>`+(ks.length?ks.map(k=>courseRow(k,false)).join(''):`<div class="empty"><h3>No courses match</h3><p>Clear a filter to see more.</p></div>`)}
+
+/* ===================== course ===================== */
+function vCourse(key){
+ const k=KM[key];if(!k)return vDest();const u=U[k.u],c=CM[k.c],sib=u.ks.slice().sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),i=sib.indexOf(k),prev=sib[i-1],next=sib[i+1],inSL=shortlist.includes(key),[pw,pwn]=psw(k.c,k.lvl,k.fld);
+ const loc=[k.city,k.prov].filter(Boolean).join(', ')||u.city;
+ page('destinations',crumbs([['Destinations','destinations'],[c.name,'c-'+c.id],[u.n,'u-'+u.id],[k.name]])+`
+ <div class="uhead" style="margin-bottom:.9rem">${logo(u)}<div><b>${esc(u.n)}</b><div class="muted small">${esc(loc)}, ${c.name}</div></div></div>
+ <h1>${esc(k.name)}</h1><div class="pills"><span class="pill">${LV[k.lvl]}</span><span class="pill">${esc(k.fld)}</span>${k.tags&1?'<span class="pill g">Scholarships available</span>':''}${k.tags&2?'<span class="pill g">Co-op / placement</span>':''}${k.tags&4?'<span class="pill g">Pathway option</span>':''}</div>
+ <div class="kv"><div><span>Duration</span><b>${dur(k)}</b></div><div><span>Tuition per year</span><b>${money(k.c,k.fee)}</b>${k.fee&&k.c!=='usa'?`<em>≈ US$${fmt(usd(k.c,k.fee))}</em>`:''}</div><div><span>Application fee</span><b>${k.app?money(k.c,k.app):k.fee?'None listed':'On request'}</b></div><div><span>Campus</span><b style="font-size:1rem">${esc(loc)}</b></div></div>
+ <div class="two"><div><div class="panel"><h2>Course overview</h2><div class="prose" id="sum"><p class="muted">Loading course details…</p></div></div></div>
+ <div><div class="panel"><h3>Upcoming intakes</h3>${k.ins.length?k.ins.map(x=>{const[st,dl]=x.split('|');return `<div class="intk"><b>${ym(st)}</b><span class="muted small">${dl?'Apply by '+dt(dl):'Starts '+dt(st)}</span></div>`}).join(''):'<p class="muted" style="margin:0">LGA confirms intake dates with the university.</p>'}</div>
+ <div class="panel dark"><h3>Work after graduation</h3><p class="big">${pw}</p><p class="muted small" style="margin:0">${pwn}</p></div>
+ <div class="panel"><button class="btn" data-sl="${key}" style="width:100%">${inSL?'✓ In shortlist (remove)':'+ Add to shortlist'}</button><p class="muted small" style="margin:.6rem 0 0;text-align:center">Shortlisted courses appear side by side for comparison.</p></div></div></div>
+ <div class="stepper">${prev?`<button class="btn line" data-go="k-${prev.key}">← ${esc(prev.name)}</button>`:'<span></span>'}${next?`<button class="btn line" data-go="k-${next.key}">${esc(next.name)} →</button>`:''}</div>
+ <p class="note">Fees and intakes come from LGA’s course catalogue (updated ${D.built}); US$ figures use ${D.fxDate} rates. LGA confirms entry and English requirements for your profile before you apply.</p>`);
+ detail(k.c,d=>{const e=document.getElementById('sum');if(!e||location.hash!=='#k-'+key)return;e.innerHTML=d.k[key]||'<p class="muted">Your counsellor will walk you through the full course outline.</p>'})}
+
+/* ===================== finder ===================== */
+function vFinder(){
+ page('finder',`<div class="hero"><div><h1>Find a course</h1><p class="muted" style="margin:0">Search ${fmt(K.length)} courses across all five destinations, then narrow down.</p></div></div>
+ <div class="split">${rail('all',{groups:[{t:'Destination',k:'co',opts:COUNTRIES.map(c=>[c.id,c.name,K.filter(k=>k.c===c.id).length])},{t:'Study level',k:'lvl',opts:opt.lvl(K)},{t:'Field of study',k:'fld',opts:opt.fld(K)},{t:'Upcoming intake',k:'mon',opts:opt.mon(K)}],budget:budgetCfg(K,'US$',true),extras:true})}<section id="results"></section></div>`);renderFinder()}
+function renderFinder(){
+ const f=filt('all'),box=document.getElementById('results');if(!box)return;const q=f.q.trim().toLowerCase();
+ const ks=K.filter(k=>match(k,f,'all')&&(!q||(k.name+' '+U[k.u].n+' '+k.city).toLowerCase().includes(q)));const lim=f.show+6;
+ box.innerHTML=`<div class="count"><h2 style="margin:0">${fmt(ks.length)} course${ks.length===1?'':'s'}</h2><span class="muted small">Across ${new Set(ks.map(k=>k.u)).size} institutions${f.max?' · budget in US$ equivalent':''}</span></div>`+
+ (ks.length?ks.slice(0,lim).map(k=>courseRow(k,true)).join('')+(ks.length>lim?`<div class="pager"><button class="btn line" data-page="all">Show more (${fmt(ks.length-lim)} left)</button></div>`:''):`<div class="empty"><h3>No courses match</h3><p>Try a different field, intake or budget.</p></div>`)}
+
+/* ===================== services / journey / shortlist ===================== */
+function vServices(){page('services',`<div class="hero"><div><h1>Everything you need to study abroad</h1><p class="muted" style="margin:0">Three teams, one plan: admissions, visas and English tests working together on your application.</p></div><button class="btn alt" data-go="journey">See your journey →</button></div>
+ <div class="grid">${SERVICES.map(([t,l])=>`<div class="card"><div class="body"><div class="dia"><i></i></div><h2 style="margin:0 0 .3rem">${t}</h2><ul class="tick">${l.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`).join('')}</div>
+ <h2 style="margin-top:2.2rem">Why LGA</h2><div class="grid">${WHY.map(([t,d])=>`<div class="panel" style="margin:0"><h3>${t}</h3><p class="muted" style="margin:0">${d}</p></div>`).join('')}</div>`)}
+function vJourney(){page('journey',`<div class="hero"><div><h1>Your journey with LGA</h1><p class="muted" style="margin:0">From your first free consultation to the day you fly.</p></div><button class="btn" data-go="destinations">Explore destinations →</button></div>
+ <div class="journey">${STEPS.map(([t,d])=>`<div><h3>${t}</h3><p class="muted small" style="margin:0">${d}</p></div>`).join('')}</div>
+ <h2>Documents you will need</h2><div class="two" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr))">${DOCS.map(([t,l])=>`<div class="panel" style="margin:0"><h3>${t}</h3><ul class="tick">${l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>
+ <p class="note">Your final checklist depends on the destination, course and visa type; we confirm yours during counselling. Never move large sums into your account just before applying without guidance: unexplained deposits are a common refusal reason.</p>`)}
+function vShortlist(){
+ const ks=shortlist.map(x=>KM[x]).filter(Boolean);
+ const rows=[['University',k=>`${esc(U[k.u].n)}<br><span class="muted small">${esc(k.city||U[k.u].city)}</span>`],['Destination',k=>CM[k.c].name],['Level',k=>LV[k.lvl]],['Duration',k=>dur(k)],['Tuition / year',k=>`<b>${money(k.c,k.fee)}</b>${k.fee&&k.c!=='usa'?`<br><span class="muted small">≈ US$${fmt(usd(k.c,k.fee))}</span>`:''}`],['Next intake',k=>nextIntake(k)],['Work after study',k=>psw(k.c,k.lvl,k.fld)[0]]];
+ page('shortlist',`<div class="hero"><div><h1>Your shortlist</h1><p class="muted" style="margin:0">${ks.length?'Compare your options side by side.':'Add courses from any course page to compare them here.'}</p></div>
+ ${ks.length?`<div style="display:flex;gap:.6rem;flex-wrap:wrap"><button class="btn line" data-act="copy">Copy summary</button><button class="btn alt" data-act="reset">Start new consultation</button></div>`:''}</div>
+ ${ks.length?`<div class="scroll panel" style="padding:0"><table><thead><tr><th></th>${ks.map(k=>`<td><h3><button data-go="k-${k.key}" style="background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit">${esc(k.name)}</button></h3><button class="more" data-sl="${k.key}">Remove</button></td>`).join('')}</tr></thead>
+ <tbody>${rows.map(([t,fn])=>`<tr><th>${t}</th>${ks.map(k=>`<td>${fn(k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+ :`<div class="empty"><h3>No courses shortlisted yet</h3><p><button class="btn" data-go="destinations">Explore destinations</button></p></div>`}`)}
+
+/* ===================== router & events ===================== */
+function route(){const h=(location.hash||'#welcome').slice(1);
+ if(h==='destinations')return vDest();if(h==='finder')return vFinder();if(h==='services')return vServices();if(h==='journey')return vJourney();if(h==='shortlist')return vShortlist();
+ if(h.startsWith('c-'))return vCountry(h.slice(2));if(h.startsWith('u-'))return vUni(h.slice(2));if(h.startsWith('k-'))return vCourse(h.slice(2));vWelcome()}
+function refresh(s){if(s==='all')renderFinder();else if(s.startsWith('u-'))renderUniCourses(s.slice(2));else renderUnis(s)}
+function resetSession(){shortlist=[];saveSL();for(const k in F)delete F[k];for(const k in tab)delete tab[k];go('welcome')}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.go){go(d.go);return}
+ if(d.f){const[s,k,v]=d.f.split('|'),set=filt(s)[k];set.has(v)?set.delete(v):set.add(v);b.setAttribute('aria-pressed',set.has(v));filt(s).show=24;refresh(s);return}
+ if(d.more){filt(d.more).provAll=true;route();return}
+ if(d.page){filt(d.page).show+=24;refresh(d.page);return}
+ if(d.clear){const f=filt(d.clear);['prov','lvl','fld','co','mon'].forEach(x=>f[x].clear());Object.assign(f,{q:'',max:0,sch:false,coop:false,show:24});route();return}
+ if(d.tab){const[c,t]=d.tab.split('|');tab[c]=t;vCountry(c);return}
+ if(d.sl){const i=shortlist.indexOf(d.sl);if(i>=0){shortlist.splice(i,1);toast('Removed from shortlist')}else{shortlist.push(d.sl);toast('Added to shortlist')}saveSL();const y=scrollY;route();scrollTo(0,y);return}
+ if(d.act==='expand'){const el=document.getElementById(d.t);el.classList.toggle('clamp');b.textContent=el.classList.contains('clamp')?'Read more':'Show less';return}
+ if(d.act==='back'){history.length>1?history.back():go('destinations')}
+ else if(d.act==='fs'){(document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()).catch(()=>toast('Full screen is not available here'))}
+ else if(d.act==='reset')resetSession();
+ else if(d.act==='copy'){const t='Your LGA shortlist\n'+shortlist.map(x=>{const k=KM[x];return`• ${k.name}, ${U[k.u].n} (${CM[k.c].name}): ${dur(k)}, ${money(k.c,k.fee)}${k.fee?'/yr':''}`}).join('\n')+'\n\nLGA Visa · '+CONTACT;
+  navigator.clipboard.writeText(t).then(()=>toast('Summary copied, ready to paste into WhatsApp or email')).catch(()=>toast('Copy is not available here'))}});
+document.addEventListener('input',e=>{const t=e.target,s=t.dataset.scope;
+ if(t.id==='q'){filt(s).q=t.value;filt(s).show=24;refresh(s)}
+ else if(t.id==='budget'){const f=filt(s),v=+t.value,top=v>=+t.max;f.max=top?0:v;document.getElementById('bv').textContent=top?'Any budget':t.dataset.cur+fmt(v);f.show=24;refresh(s)}});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.id==='sort'){filt(t.dataset.scope).sort=t.value;refresh(t.dataset.scope)}
+ else if(t.dataset.x){const[s,k]=t.dataset.x.split('|');filt(s)[k]=t.checked;filt(s).show=24;refresh(s)}});
+document.addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName)){if(e.key==='Escape')e.target.blur();return}
+ const h=location.hash.slice(1);
+ if(e.key==='Escape'&&h&&h!=='welcome')history.back();else if(e.key==='Home')go('destinations');
+ else if(h.startsWith('k-')&&/Arrow(Left|Right)/.test(e.key)){const b=document.querySelectorAll('.stepper [data-go]'),r=e.key==='ArrowRight';const t=[...b].find(x=>x.textContent.trim().startsWith('←')!==r);if(t)go(t.dataset.go)}});
+/* idle reset: clears the screen for the next visitor */
+const IDLE_MS=4*60*1000,idle=document.getElementById('idle');let idleT,cdT;
+function poke(){if(idle.style.display==='grid')return;clearTimeout(idleT);idleT=setTimeout(()=>{const h=location.hash.slice(1);if(!h||h==='welcome')return poke();let n=20;idle.style.display='grid';document.getElementById('idleN').textContent=n;
+ cdT=setInterval(()=>{n--;document.getElementById('idleN').textContent=n;if(n<=0){clearInterval(cdT);idle.style.display='none';resetSession();poke()}},1000)},IDLE_MS)}
+document.getElementById('idleKeep').addEventListener('click',()=>{clearInterval(cdT);idle.style.display='none';poke()});
+['pointerdown','keydown','wheel','touchstart'].forEach(ev=>addEventListener(ev,poke,{passive:true}));
+addEventListener('hashchange',route);route();poke();
+}
+</script>
+</body>
+</html>
