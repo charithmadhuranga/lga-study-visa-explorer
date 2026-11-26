@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Capabilities for the main presentation window. Grant the minimum: every entry here must be justified by a SPEC FR (AGENTS §3).","local":true,"windows":["main"],"permissions":["core:default","core:window:allow-set-fullscreen","core:window:allow-is-fullscreen","clipboard-manager:allow-write-text","store:default"]}}
