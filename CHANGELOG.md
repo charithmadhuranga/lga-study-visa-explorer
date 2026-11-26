@@ -2,7 +2,7 @@
 
 All notable changes to LGA Study Visa Explorer. Versions follow [Semantic Versioning](https://semver.org).
 
-## [Unreleased]
+## [0.1.1] — 2026-11-27
 
 ### Fixed
 - **Animation glitches:** elements could end stuck part-way through their entrance (e.g. the
