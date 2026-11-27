@@ -194,7 +194,7 @@ Signing key generated 2026-11-26 and stored outside the repo (`~/.tauri/`), uplo
 repo's Actions secrets. Local signed AppImage build verified (artefact + `.sig`).
 
 **Gate G7:** a prerelease version installs on a test machine on all three OSes after one click;
-a bad signature is rejected and logged. — ⏳ v0.1.1 published 2026-11-27: confirm an installed v0.1.0 offers and installs it on each OS.
+a bad signature is rejected and logged. — ⏳ v0.1.2 published 2026-11-27: confirm an installed v0.1.0/v0.1.1 offers and installs it on each OS.
 
 ---
 

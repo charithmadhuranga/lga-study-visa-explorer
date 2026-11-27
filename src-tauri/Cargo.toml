@@ -1,6 +1,6 @@
 [package]
 name = "lga-study-visa-explorer"
-version = "0.1.1"
+version = "0.1.2"
 description = "Full-screen consultation screen for LGA Visa: destinations, universities and courses"
 authors = ["Lanka Global Access (Pvt) Ltd"]
 edition = "2021"
