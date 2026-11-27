@@ -2,6 +2,20 @@
 
 All notable changes to LGA Study Visa Explorer. Versions follow [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Fixed
+- **Sections not loading until a reload (Linux):** after navigating, every section except
+  Destinations could stay blank until the app was reloaded. The page fade used an animation
+  that never finished in the Linux web engine (WebKitGTK), leaving the page invisible. The
+  fade is now a plain CSS animation whose resting state is always visible.
+- Escape on the status popover or the Close dialog now only closes it, never also goes back.
+
+### Added
+- **Real-engine smoke test** (`npm run e2e:webkitgtk`): drives the app in WebKitGTK — the
+  engine the Linux app actually uses — through every section, the drill-down, the overlays and
+  the clicker keys, in CI on every push. It fails 11 of 17 navigation steps on v0.1.1.
+
 ## [0.1.1] — 2026-11-27
 
 ### Fixed

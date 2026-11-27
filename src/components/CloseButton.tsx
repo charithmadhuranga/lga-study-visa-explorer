@@ -54,7 +54,7 @@ function ConfirmClose({ onCancel }: { onCancel: () => void }): React.JSX.Element
     keep.current?.focus();
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         onCancel();
       }
       if (e.key === 'Tab') {

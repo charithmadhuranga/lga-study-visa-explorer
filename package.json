@@ -21,6 +21,7 @@
     "test:watch": "vitest",
     "e2e": "playwright test --project=chromium-fullscreen --project=chromium-windowed --project=chromium-slow-cpu --project=chromium-reduced-motion",
     "e2e:all": "playwright test",
+    "e2e:webkitgtk": "npm run build && node scripts/run-webkitgtk-smoke.mjs",
     "data:import": "node scripts/import-reference-data.mjs",
     "data:parity": "node scripts/check-parity.mjs",
     "data:parity:upstream": "cargo test --manifest-path src-tauri/Cargo.toml --test upstream_parity -- --nocapture"

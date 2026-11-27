@@ -447,7 +447,7 @@ record — verified 2026-11-26: 436 universities, 4,225 courses, 4,202 summaries
 | NFR-14 | Compatibility | Windows 10/11 x64, macOS 12+ (arm64/x86_64), Ubuntu 22.04+ / AppImage | smoke test per OS |
 | NFR-15 | Maintainability | Typecheck + lint + unit tests green in CI on every push | CI status |
 | NFR-16 | Localisation of numbers | `en-US` formatting for money and dates (parity with mock `toLocaleString('en-US')`) | unit test |
-| NFR-17 | Stability | Every route renders with no console errors, animations finish in their final state (nothing stuck faded or offset), no horizontal overflow at 1920×1080 and 1366×768, navigation lands at the top, no task > 200 ms on route changes or typing | Playwright suite (`npm run e2e:all`) green in Chromium and WebKit, in CI |
+| NFR-17 | Stability | Every route renders with no console errors, animations finish in their final state (nothing stuck faded or offset), no horizontal overflow at 1920×1080 and 1366×768, navigation lands at the top, no task > 200 ms on route changes or typing | Playwright suite (`npm run e2e:all`) green in Chromium and WebKit, **and** the WebKitGTK smoke test (`npm run e2e:webkitgtk`, the real Linux engine) green, in CI |
 
 ---
 

@@ -53,7 +53,7 @@ src/
                      appUpdate.ts (app self-update, FR-24)
   hooks/             useGlobalKeys.ts (Esc/Home/PageUp/PageDown/F11/Ctrl+Q)  useIdleTimer.ts
   shell/             window.ts (fullscreen, quit, kiosk info — the only code that talks to window APIs)
-  animation/         variants.ts  usePageTransition.ts  useCountUp.ts  useMotionEnabled.ts
+  animation/         variants.ts  useMountAnimation.ts  useCountUp.ts  useMotionEnabled.ts
   assets/img/        copied from reference/img (hero, dest-*, logo, uni/*)
 src-tauri/src/
   main.rs  lib.rs
@@ -104,6 +104,7 @@ npm run test               # vitest run (unit + component + parity of the JS sid
 npm run test:watch
 npm run e2e                # Playwright on the production build (Chromium: fullscreen, windowed, 4× slow CPU, reduced motion)
 npm run e2e:all            # + WebKit (needs `npx playwright install --with-deps webkit`)
+npm run e2e:webkitgtk      # real WebKitGTK 4.1 (Tauri's Linux engine) smoke test; needs python3-gi + gir1.2-webkit2-4.1
 npm run build              # tsc && vite build
 npm run tauri build        # release installers + updater artefacts (needs TAURI_SIGNING_PRIVATE_KEY; see the lga-tauri-shell skill)
 
@@ -161,7 +162,9 @@ LGA_CATALOGUE_SOURCE=/path/to/processed npm run tauri dev   # run the updater ag
   timers; the Rust transform additionally has parity tests (see the catalogue skill);
   anything a consultant sees or clicks through → a Playwright spec in `e2e/`.
 - `npm test`, `npm run e2e` and `cargo test` must be green before a change is considered done
-  (CI also runs WebKit: `npm run e2e:all`).
+  (CI also runs WebKit, `npm run e2e:all`, and the real-engine `npm run e2e:webkitgtk`).
+- Playwright's WebKit is **not** the engine the app ships with on Linux. Anything involving
+  navigation or animation must also pass `npm run e2e:webkitgtk`.
 
 ## 6. Definition of done (per task)
 

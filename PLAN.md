@@ -232,6 +232,7 @@ windowed), a window that could not be moved, no close button, slow / stuck data 
 | 9.6 | Data: `logo_src`/`catalogue_active` async (off the UI thread), logo lookup by direct stat; minified snapshot (catalogue 3.25 → 2.54 MB); snapshot carries the real upstream `generatedAt`, so a fresh install no longer re-downloads identical data on first launch | ✅ |
 | 9.7 | CI: `e2e` job runs the full suite in Chromium and WebKit, uploads report + traces on failure | ✅ |
 | 9.8 | Weak-hardware pass (found by CI's GPU-less WebKit and a new 4× slow-CPU Chromium project): no full-screen photo zooms or backdrop blur; `decoding="async"` images; memoised country/finder chip options and results; `<html data-animating>` signal so tests wait for real completion | ✅ Canada page freeze 363 → ≤ 63 ms, finder 117 → ~55 ms, typing 1,350 → ~920 ms (4× throttled) |
+| 9.9 | Sections blank until reload in the Linux app (v0.1.1): Motion page tween stalled at opacity 0 in WebKitGTK → CSS `.page-enter` with a visible resting state; `scripts/webkitgtk-smoke.py` drives the real engine (22 steps, CI `webkitgtk` job) and fails 11/17 navigation steps on v0.1.1 | ✅ |
 
 Measured (Chromium, production build): every route ready 0.5–1.1 s cold; no task ≥ 50 ms on
 route changes; search keeps up with typing. WebKit: all specs green.

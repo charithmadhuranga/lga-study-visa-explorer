@@ -260,7 +260,7 @@ component, classes prefixed by the component).
 | Finder | the result list fades in once as a block on arrival; filtering never re-animates it, and results follow typing via `useDeferredValue` |
 | Shortlist | table `layout` spring on add/remove; top-bar badge pops on count change |
 | Next steps | timeline steps stagger, CTA band rises |
-| Global | the old `<main>` leaves instantly, the view jumps (never smooth-scrolls) to the top, the new page fades/rises 16 px in 0.32 s; chapter ink slides |
+| Global | the old `<main>` leaves instantly, the view jumps (never smooth-scrolls) to the top before paint, the new page fades/rises 16 px in 0.32 s via the CSS `.page-enter` animation (no fill-mode, so a page is visible even if the animation never runs — a Motion opacity tween stalled at 0 in WebKitGTK); chapter ink slides |
 | Idle dialog | backdrop fade .25 s, panel `scale .96→1` |
 | Toast | `y 24→0` in .25 s, out .2 s |
 

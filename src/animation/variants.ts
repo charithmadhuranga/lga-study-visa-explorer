@@ -7,15 +7,6 @@ import type { Transition, Variants } from 'motion/react';
 
 export const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
-export const pageVariants: Variants = {
-  initial: { opacity: 0, y: 16 },
-  // The old page leaves instantly and only the new one fades in: fading a large page out first
-  // doubles the compositing work per navigation (painful on GPU-less office PCs) and delayed
-  // the scroll-to-top behind it.
-  enter: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE_OUT_EXPO } },
-  exit: { opacity: 0, transition: { duration: 0 } },
-};
-
 /** Parent variant set for staggered grids (DESIGN §7.3: ≤12 animated children). */
 export const staggerParent = (n = 0.06): Variants => ({
   initial: {},

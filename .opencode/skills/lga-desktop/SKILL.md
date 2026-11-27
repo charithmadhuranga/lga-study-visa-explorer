@@ -21,7 +21,7 @@ src/
                  StatusPopover UpdateBanner Skeleton
   data/          types.ts content.ts catalogue.ts selectors.ts filters.ts format.ts
   store/         session.ts filters.ts catalogue.ts appearance.ts
-  animation/     variants.ts usePageTransition.ts useCountUp.ts useMotionEnabled.ts
+  animation/     variants.ts useMountAnimation.ts useCountUp.ts useMotionEnabled.ts
   assets/img/    hero.webp dest-*.webp logo.png uni/*.webp   (copied from reference/img)
 ```
 
@@ -43,7 +43,8 @@ The presentation order (FR-27) lives only in `src/data/chapters.ts`: `CHAPTERS`,
    chapter, add it to `src/data/chapters.ts` and open it with `<PageHeader>`.
 4. Get data from selectors (`src/data/selectors.ts`), never by parsing JSON in a component.
 5. Use tokens/`DESIGN.md` components only — no new colours, radii, shadows or font sizes.
-6. Add motion via `usePageTransition` + the screen's GSAP context (see the `lga-design-system` skill).
+6. The page entrance is automatic (CSS `.page-enter` on `<main>` in `App.tsx`); add the screen's own
+   entrance with `useMountAnimation` (see the `lga-design-system` skill).
 7. Verify: full route renders at 1920×1080, works offline, reduced-motion path, keyboard path.
 8. Test at the lowest useful level; tick the `PLAN.md` task.
 

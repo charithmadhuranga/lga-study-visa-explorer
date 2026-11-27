@@ -37,7 +37,7 @@ export function StatusPopover(): React.JSX.Element {
     if (!open) return;
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         setOpen(false);
       }
     };

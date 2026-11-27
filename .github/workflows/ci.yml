@@ -70,3 +70,23 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 14
+
+  webkitgtk:
+    # The real Linux engine Tauri uses. Playwright's WebKit is a different build and missed a
+    # v0.1.1 bug where pages stayed invisible after navigation; this smoke test catches it.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: WebKitGTK 4.1 + virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb
+
+      - run: npm ci
+      - run: xvfb-run -a npm run e2e:webkitgtk

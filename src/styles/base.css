@@ -213,6 +213,18 @@ img {
   color: var(--gold);
 }
 
+/* Page entrance (DESIGN §7.3). No fill-mode on purpose: if an engine never runs the animation,
+   the page simply shows at its natural, fully visible state. */
+.page-enter {
+  animation: lga-page-in 0.32s var(--ease-out-expo);
+}
+@keyframes lga-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
 /* Respect the OS reduced-motion setting even before React mounts (NFR-11). */
 @media (prefers-reduced-motion: reduce) {
   *,

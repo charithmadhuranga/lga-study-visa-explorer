@@ -135,7 +135,8 @@ export async function stuckElements(page: Page): Promise<string[]> {
       const text = (el.textContent ?? '').trim().slice(0, 40);
       return `${el.tagName.toLowerCase()}${cls ? '.' + cls : ''} "${text}"`;
     };
-    for (const el of document.querySelectorAll('#root main *, #root header *')) {
+    // `main` itself included: v0.1.1's page container stalled at opacity 0 in WebKitGTK.
+    for (const el of document.querySelectorAll('#root main, #root main *, #root header *')) {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       if (r.bottom < 0 || r.top > innerHeight) continue; // off-screen content is not the point
