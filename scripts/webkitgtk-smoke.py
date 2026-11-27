@@ -31,6 +31,9 @@ SETTLE_MS = 2200  # longer than any entrance animation
 CHAPTER = '[...document.querySelectorAll(".chapter")].find(a => a.textContent.includes("%s")).click()'
 BUTTON = '[...document.querySelectorAll("button")].find(b => b.textContent.includes("%s")).click()'
 
+# Expected-heading sentinel: the step must leave the app on the page the previous step showed.
+SAME_PAGE = "<same page>"
+
 # (label, action, expected <h1>[, settle ms, overlay that must be fully visible])
 STEPS = [
     ("start the consultation", BUTTON % "Start the consultation", r"Everything you need"),
@@ -50,7 +53,7 @@ STEPS = [
     ("Close → confirmation", "document.querySelector('.icon-btn--close').click()", r".+", 900, ".idle-panel"),
     ("Keep presenting", BUTTON % "Keep presenting", r".+"),
     ("status chip → popover", "document.querySelector('.status-chip').click()", r".+", 900, ".status-pop"),
-    ("Escape closes popover only", "document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}))", r"Accounting & Mathematics"),
+    ("Escape closes popover only", "document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}))", SAME_PAGE),
     ("breadcrumb: country", "[...document.querySelectorAll('.crumbs__link')][1].click()", r"Study in United Kingdom"),
     ("chapter: Courses again", CHAPTER % "Courses", r"Find the right course"),
     ("PageDown (clicker)", "document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'PageDown', bubbles: true}))", r"Your shortlist"),
@@ -85,7 +88,7 @@ view = WebKit2.WebView()
 window.add(view)
 window.show_all()
 
-state = {"i": -1, "failures": 0, "started": False}
+state = {"i": -1, "failures": 0, "started": False, "last_hash": None}
 
 
 def check(label, expected, raw, overlay=None):
@@ -93,8 +96,12 @@ def check(label, expected, raw, overlay=None):
     problems = []
     if overlay and d["overlay"] != 1:
         problems.append(f"{overlay} not visible (opacity {d['overlay']})")
-    if not re.search(expected, d["h1"], re.I):
+    if expected == SAME_PAGE:
+        if d["hash"] != state["last_hash"]:
+            problems.append(f"navigated away: {state['last_hash']} -> {d['hash']}")
+    elif not re.search(expected, d["h1"], re.I):
         problems.append(f"heading {d['h1']!r} does not match /{expected}/")
+    state["last_hash"] = d["hash"]
     if d["text"] < 100:
         problems.append(f"page nearly empty ({d['text']} chars)")
     if d["mains"] != 1:
